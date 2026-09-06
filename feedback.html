@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-th="รายงานปัญหา / Feedback – Overdrive Utility" data-en="Feedback – Overdrive Utility">รายงานปัญหา / Feedback – Overdrive Utility</title>
+<meta name="description" content="แจ้งบั๊ก เสนอฟีเจอร์ หรือถามคำถามเกี่ยวกับแอปและเกมของ Overdrive Labs">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ff6a00'/%3E%3Ctext x='32' y='44' font-size='34' font-family='sans-serif' font-weight='900' text-anchor='middle' fill='white'%3EO%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><span class="logo">O</span> Overdrive Utility</a>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html#apps" data-th="แอป" data-en="Apps">แอป</a>
+      <a href="index.html#games" data-th="เกม" data-en="Games">เกม</a>
+      <a href="tou.html" data-th="ปฏิทิน TOU" data-en="TOU Calendar">ปฏิทิน TOU</a>
+      <a href="connect.html" data-th="เชื่อมต่อ" data-en="Connect">เชื่อมต่อ</a>
+      <a href="feedback.html" data-th="รายงาน / Feedback" data-en="Feedback">รายงาน / Feedback</a>
+      <a href="terms.html" data-th="ข้อตกลงการใช้งาน" data-en="Terms">ข้อตกลงการใช้งาน</a>
+      <button class="lang-toggle" id="langToggle">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main class="page" style="max-width: 640px;">
+  <h1>💬 <span data-th="รายงานปัญหา / Feedback" data-en="Feedback &amp; bug reports">รายงานปัญหา / Feedback</span></h1>
+  <p class="lead" data-th="เจอบั๊ก มีไอเดีย หรือมีคำถาม? บอกเราได้เลย — กดส่งแล้วจะเปิดแอปอีเมลของคุณพร้อมข้อความที่กรอกไว้ครบ"
+     data-en="Found a bug, have an idea or a question? Tell us — sending opens your email app with everything filled in.">เจอบั๊ก มีไอเดีย หรือมีคำถาม? บอกเราได้เลย</p>
+
+  <label for="app" data-th="แอป / เกม" data-en="App / game">แอป / เกม</label>
+  <select id="app">
+    <option value="DriveMeter">🚗 DriveMeter</option>
+    <option value="DriveVolt">⚡ DriveVolt</option>
+    <option value="OBD2 Easy">🔧 OBD2 Easy: ICE &amp; EV</option>
+    <option value="Pixel Putt">⛳ Pixel Putt</option>
+    <option value="TOU Calendar" data-th="📅 ปฏิทิน TOU" data-en="📅 TOU Calendar">📅 ปฏิทิน TOU</option>
+    <option value="Website" data-th="🌐 เว็บไซต์นี้" data-en="🌐 This website">🌐 เว็บไซต์นี้</option>
+    <option value="Other" data-th="อื่น ๆ" data-en="Other">อื่น ๆ</option>
+  </select>
+
+  <label for="type" data-th="ประเภท" data-en="Type">ประเภท</label>
+  <select id="type">
+    <option value="Bug" data-th="🐞 แจ้งบั๊ก / ปัญหาการใช้งาน" data-en="🐞 Bug report">🐞 แจ้งบั๊ก / ปัญหาการใช้งาน</option>
+    <option value="Suggestion" data-th="💡 ข้อเสนอแนะ / อยากได้ฟีเจอร์" data-en="💡 Suggestion / feature request">💡 ข้อเสนอแนะ / อยากได้ฟีเจอร์</option>
+    <option value="Question" data-th="❓ คำถาม" data-en="❓ Question">❓ คำถาม</option>
+    <option value="Other" data-th="อื่น ๆ" data-en="Other">อื่น ๆ</option>
+  </select>
+
+  <label for="msg" data-th="ข้อความของคุณ" data-en="Your message">ข้อความของคุณ</label>
+  <textarea id="msg" data-th="เกิดอะไรขึ้น ทำอย่างไรถึงเจอ หรืออยากให้มีอะไรเพิ่ม" data-en="What happened, how to reproduce it, or what you would like to see" placeholder="เกิดอะไรขึ้น ทำอย่างไรถึงเจอ หรืออยากให้มีอะไรเพิ่ม"></textarea>
+
+  <label for="contact" data-th="อีเมลของคุณ (ไม่บังคับ — ไว้ให้เราตอบกลับ)" data-en="Your email (optional — so we can reply)">อีเมลของคุณ (ไม่บังคับ — ไว้ให้เราตอบกลับ)</label>
+  <input id="contact" type="email" placeholder="you@example.com">
+
+  <button class="send" id="send" data-th="ส่งความคิดเห็น" data-en="Send feedback">ส่งความคิดเห็น</button>
+
+  <p class="hint" id="hint"></p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Overdrive Labs</span>
+    <span><a href="index.html" data-th="หน้าแรก" data-en="Home">หน้าแรก</a> · <a href="connect.html" data-th="เชื่อมต่อ" data-en="Connect">เชื่อมต่อ</a> · <a href="terms.html" data-th="ข้อตกลงการใช้งาน" data-en="Terms">ข้อตกลงการใช้งาน</a></span>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+  var TO = "overdrivelabs998@gmail.com";
+  function param(n){ try { return new URLSearchParams(location.search).get(n) || ""; } catch(e){ return ""; } }
+
+  // Preselect the app when linked from a card or from inside an app (?app=DriveVolt)
+  var asked = param("app"), sel = document.getElementById("app");
+  for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value.toLowerCase() === asked.toLowerCase()) sel.selectedIndex = i;
+
+  function renderHint(){
+    var th = OV.lang() === "th", h = document.getElementById("hint");
+    h.textContent = "";
+    h.appendChild(document.createTextNode(th
+      ? "ปุ่มนี้จะเปิดแอปอีเมลในเครื่องคุณ ส่งถึง "
+      : "This opens your device's email app addressed to "));
+    var a = document.createElement("a"); a.href = "mailto:" + TO; a.textContent = TO; h.appendChild(a);
+    h.appendChild(document.createTextNode(th
+      ? " หน้านี้ไม่เก็บข้อมูลใด ๆ ถ้ามาจากในแอป ระบบจะแนบเวอร์ชันแอปและรุ่นอุปกรณ์ให้อัตโนมัติเพื่อช่วยตรวจสอบ"
+      : ". This page collects nothing. When opened from an app, the app version and device model are attached automatically to help us diagnose."));
+  }
+  renderHint();
+  document.getElementById("langToggle").addEventListener("click", function(){ setTimeout(renderHint, 0); });
+
+  document.getElementById("send").addEventListener("click", function(){
+    var app = sel.value, type = document.getElementById("type").value;
+    var msg = document.getElementById("msg").value.trim(), from = document.getElementById("contact").value.trim();
+    if (!msg) { document.getElementById("msg").focus(); return; }
+    var ver = param("v"), dev = param("d");
+    var subject = "[" + app + "] " + type + (ver ? " – v" + ver : "");
+    var body = msg + "\n\n------------------------------\n" +
+      "App: " + app + "\nType: " + type + "\n" +
+      (from ? "Reply to: " + from + "\n" : "") +
+      (ver ? "App version: " + ver + "\n" : "") +
+      (dev ? "Device: " + dev + "\n" : "") +
+      "Language: " + OV.lang() + "\nFrom: Overdrive Utility website\n";
+    location.href = "mailto:" + TO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+  });
+</script>
+</body>
+</html>

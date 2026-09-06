@@ -1,0 +1,15 @@
+{
+  "name": "TOU Off-Peak Calendar – Overdrive Utility",
+  "short_name": "TOU Calendar",
+  "description": "ปฏิทินค่าไฟ TOU 2569 พร้อมแจ้งเตือนก่อนเข้าช่วง Peak / Off-Peak",
+  "start_url": "./tou.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1420",
+  "theme_color": "#0aa66b",
+  "lang": "th",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-th="ปฏิทิน Off-Peak TOU 2569 – Overdrive Utility" data-en="TOU Off-Peak Calendar 2026 – Overdrive Utility">ปฏิทิน Off-Peak TOU 2569</title>
+<meta name="description" content="ปฏิทินค่าไฟ TOU (Time of Use) ปี 2569 — วัน Off-Peak เต็มวัน วันหยุดราชการ พร้อมแจ้งเตือนก่อนเข้าช่วง Peak / Off-Peak">
+<meta name="theme-color" content="#0aa66b">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230aa66b'/%3E%3Ctext x='32' y='46' font-size='36' text-anchor='middle'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+<style>
+  /* ---- Page-specific: status, controls, calendar ---- */
+  .tou-head { text-align: center; padding: 28px 0 8px; }
+  .tou-head .badge { display: inline-block; background: linear-gradient(90deg,#ff8a00,#ff3d7f); color: #fff; font-weight: 700; font-size: .8em; letter-spacing: 2px; padding: 4px 16px; border-radius: 30px; }
+  .tou-head h1 { font-size: clamp(1.6em, 5vw, 2.4em); font-weight: 800; margin: 10px 0 2px; background: linear-gradient(90deg,#00b894,#0984e3,#6c5ce7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tou-head .sub { color: var(--muted); font-size: .95em; }
+
+  /* live status */
+  .status { border-radius: var(--radius); padding: 18px 20px; color: #fff; display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: center; justify-content: space-between; margin: 18px 0; box-shadow: var(--shadow); }
+  .status.off { background: linear-gradient(135deg,#26de81,#0aa66b); }
+  .status.on { background: linear-gradient(135deg,#ff7675,#d63031); }
+  .status .big { font-size: 1.5em; font-weight: 800; line-height: 1.1; }
+  .status .small { opacity: .95; font-size: .95em; }
+  .status .clock { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.1em; }
+
+  .legend { display: flex; justify-content: center; gap: 14px 18px; flex-wrap: wrap; margin: 8px 0 14px; font-size: .88em; color: var(--muted); }
+  .legend .it { display: flex; align-items: center; gap: 6px; }
+  .sw { width: 16px; height: 16px; border-radius: 5px; display: inline-block; }
+  .sw.off { background: linear-gradient(135deg,#26de81,#20bf6b); }
+  .sw.hol { background: linear-gradient(135deg,#ff9f43,#ee5253); }
+  .sw.peak { background: var(--bg2); border: 1.5px solid var(--line); }
+
+  .bands { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .band { border-radius: 12px; padding: 12px 16px; color: #fff; box-shadow: var(--shadow); }
+  .band.on { background: linear-gradient(135deg,#ff7675,#d63031); }
+  .band.offb { background: linear-gradient(135deg,#26de81,#0aa66b); }
+  .band .lab { font-size: .8em; font-weight: 700; letter-spacing: 1px; }
+  .band .hrs { font-size: 1.5em; font-weight: 800; line-height: 1.1; margin: 2px 0; }
+  .band .desc { font-size: .82em; opacity: .95; }
+
+  /* notification panel */
+  .notify { background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin: 18px 0 22px; box-shadow: var(--shadow); }
+  .notify h2 { margin: 0 0 4px; font-size: 1.15em; display: flex; align-items: center; gap: 8px; }
+  .notify .desc { color: var(--muted); font-size: .9em; margin: 0 0 12px; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 16px; }
+  .opts label { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 500; font-size: .95em; cursor: pointer; }
+  .opts input[type=checkbox] { width: 18px; height: 18px; margin: 0; }
+  .lead { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; font-size: .95em; }
+  .lead select { width: auto; padding: 7px 10px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .actions .btn { font-size: .92em; padding: 9px 16px; }
+  .pill { display: inline-block; font-size: .78em; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--line); color: var(--muted); }
+  .pill.ok { background: #d9f7e8; color: #0a7f4f; }
+  .pill.bad { background: #ffe1e1; color: #b02020; }
+  @media (prefers-color-scheme: dark) { .pill.ok { background: #123f2c; color: #4be0a0; } .pill.bad { background: #4a1c1c; color: #ff8a8a; } }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: #17212b; color: #fff; padding: 12px 18px; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,.35); font-size: .95em; z-index: 50; max-width: 92vw; display: none; }
+  .toast.show { display: block; }
+
+  /* months */
+  .months { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 13px; }
+  .m { background: var(--bg2); border: 1px solid var(--line); border-radius: 14px; padding: 9px 9px 7px; box-shadow: var(--shadow); }
+  .m.cur { outline: 2px solid var(--accent); }
+  .m h3 { text-align: center; font-size: .98em; font-weight: 700; margin: 0 0 5px; color: #fff; padding: 4px 0 5px; border-radius: 8px; line-height: 1.05; }
+  .m h3 small { display: block; font-size: .62em; font-weight: 600; letter-spacing: 2px; opacity: .92; }
+  .m table { width: 100%; border-collapse: collapse; }
+  .m th { font-size: .7em; font-weight: 600; color: var(--muted); padding: 2px 0; text-align: center; border: none; }
+  .m th.sun, .m th.sat { color: #e84393; }
+  .m td { height: 30px; text-align: center; font-size: .82em; font-weight: 500; padding: 0; border: none; position: relative; }
+  .m td .d { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; }
+  .m td.off .d { background: linear-gradient(135deg,#26de81,#20bf6b); color: #fff; font-weight: 600; }
+  .m td.hol .d { background: linear-gradient(135deg,#ff9f43,#ee5253); color: #fff; font-weight: 700; box-shadow: 0 2px 6px rgba(238,82,83,.45); }
+  .m td.hol::after { content: '★'; position: absolute; top: -1px; right: 3px; font-size: .6em; color: #ff3d7f; }
+  .m td.today .d { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .m td[title] { cursor: help; }
+
+  .holwrap { margin-top: 18px; background: var(--bg2); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; }
+  .holwrap h4 { font-size: 1em; font-weight: 700; color: #ee5253; margin: 0 0 8px; }
+  .hollist { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 18px; font-size: .9em; }
+  .hollist span b { color: #ee5253; font-weight: 700; }
+  .note { text-align: center; font-size: .8em; color: var(--muted); margin: 14px 0 30px; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 8mm; }
+    header, footer, .status, .notify, .toast { display: none !important; }
+    body { background: #fff; color: #000; }
+    .months { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .m { box-shadow: none; page-break-inside: avoid; }
+    .m td { height: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><span class="logo">O</span> Overdrive Utility</a>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html#apps" data-th="แอป" data-en="Apps">แอป</a>
+      <a href="index.html#games" data-th="เกม" data-en="Games">เกม</a>
+      <a href="tou.html" data-th="ปฏิทิน TOU" data-en="TOU Calendar">ปฏิทิน TOU</a>
+      <a href="connect.html" data-th="เชื่อมต่อ" data-en="Connect">เชื่อมต่อ</a>
+      <a href="feedback.html" data-th="รายงาน / Feedback" data-en="Feedback">รายงาน / Feedback</a>
+      <a href="terms.html" data-th="ข้อตกลงการใช้งาน" data-en="Terms">ข้อตกลงการใช้งาน</a>
+      <button class="lang-toggle" id="langToggle">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="tou-head">
+    <span class="badge">⚡ TIME OF USE • OFF-PEAK</span>
+    <h1 data-th="ปฏิทิน Off-Peak TOU 2569" data-en="TOU Off-Peak Calendar 2026">ปฏิทิน Off-Peak TOU 2569</h1>
+    <div class="sub" data-th="ค.ศ. 2026 · ช่วงค่าไฟถูก (Off-Peak เต็มวัน) — อ้างอิงการไฟฟ้าส่วนภูมิภาค (PEA) และการไฟฟ้านครหลวง (MEA)"
+         data-en="B.E. 2569 · Cheap-electricity days (full-day Off-Peak) — per PEA and MEA tariffs">ค.ศ. 2026 · ช่วงค่าไฟถูก</div>
+  </div>
+
+  <div class="status" id="status" aria-live="polite">
+    <div>
+      <div class="big" id="stBig">—</div>
+      <div class="small" id="stNext">—</div>
+    </div>
+    <div class="clock" id="stClock">--:--</div>
+  </div>
+
+  <div class="legend">
+    <div class="it"><span class="sw off"></span> <span data-th="เสาร์–อาทิตย์ (Off-Peak ทั้งวัน)" data-en="Sat–Sun (Off-Peak all day)">เสาร์–อาทิตย์ (Off-Peak ทั้งวัน)</span></div>
+    <div class="it"><span class="sw hol"></span> <span data-th="★ วันหยุดราชการ (Off-Peak ทั้งวัน)" data-en="★ Public holiday (Off-Peak all day)">★ วันหยุดราชการ (Off-Peak ทั้งวัน)</span></div>
+    <div class="it"><span class="sw peak"></span> <span data-th="จ–ศ ปกติ (Peak 09:00–22:00)" data-en="Mon–Fri (Peak 09:00–22:00)">จ–ศ ปกติ (Peak 09:00–22:00)</span></div>
+  </div>
+
+  <div class="bands">
+    <div class="band on">
+      <div class="lab" data-th="🔴 ON-PEAK · ค่าไฟแพง" data-en="🔴 ON-PEAK · expensive">🔴 ON-PEAK · ค่าไฟแพง</div>
+      <div class="hrs">09:00 – 22:00</div>
+      <div class="desc" data-th="เฉพาะ จันทร์–ศุกร์ (13 ชม.)" data-en="Mon–Fri only (13 h)">เฉพาะ จันทร์–ศุกร์ (13 ชม.)</div>
+    </div>
+    <div class="band offb">
+      <div class="lab" data-th="🟢 OFF-PEAK · ค่าไฟถูก" data-en="🟢 OFF-PEAK · cheap">🟢 OFF-PEAK · ค่าไฟถูก</div>
+      <div class="hrs">22:00 – 09:00</div>
+      <div class="desc" data-th="จ–ศ ช่วงกลางคืน (11 ชม.) + ส–อา–วันหยุด ทั้งวัน 24 ชม." data-en="Mon–Fri nights (11 h) + Sat, Sun and holidays all day">จ–ศ ช่วงกลางคืน (11 ชม.) + ส–อา–วันหยุด ทั้งวัน 24 ชม.</div>
+    </div>
+  </div>
+
+  <section class="notify" id="notify">
+    <h2>🔔 <span data-th="แจ้งเตือนช่วงค่าไฟ" data-en="Tariff reminders">แจ้งเตือนช่วงค่าไฟ</span> <span class="pill" id="permPill">—</span></h2>
+    <p class="desc" data-th="เตือนก่อนเข้าช่วง Off-Peak (เสียบชาร์จได้) และก่อนเข้าช่วง Peak (ถอดสายชาร์จ) การแจ้งเตือนในเบราว์เซอร์ทำงานเมื่อเปิดหน้านี้ค้างไว้ หรือติดตั้งเป็นแอปบนหน้าจอหลัก ถ้าอยากให้เตือนแม้ปิดเว็บ ให้กด “ใส่ในปฏิทินมือถือ” เพื่อดาวน์โหลดไฟล์ปฏิทินที่มีการเตือนติดมาด้วย"
+       data-en="Get a reminder before Off-Peak starts (plug in) and before Peak starts (unplug). Browser notifications work while this page is open or installed to your home screen. For reminders even when the site is closed, tap “Add to phone calendar” to download a calendar file with alarms built in.">เตือนก่อนเข้าช่วง Off-Peak และก่อนเข้าช่วง Peak</p>
+
+    <div class="opts">
+      <label><input type="checkbox" id="optOff" checked> <span data-th="ก่อน Off-Peak เริ่ม 22:00 (จ–ศ)" data-en="Before Off-Peak starts 22:00 (Mon–Fri)">ก่อน Off-Peak เริ่ม 22:00 (จ–ศ)</span></label>
+      <label><input type="checkbox" id="optPeak" checked> <span data-th="ก่อน Peak เริ่ม 09:00 (จ–ศ)" data-en="Before Peak starts 09:00 (Mon–Fri)">ก่อน Peak เริ่ม 09:00 (จ–ศ)</span></label>
+      <label><input type="checkbox" id="optEve" checked> <span data-th="คืนก่อนวัน Off-Peak เต็มวัน (20:00)" data-en="Evening before a full Off-Peak day (20:00)">คืนก่อนวัน Off-Peak เต็มวัน (20:00)</span></label>
+    </div>
+    <div class="lead">
+      <span data-th="เตือนล่วงหน้า" data-en="Lead time">เตือนล่วงหน้า</span>
+      <select id="lead">
+        <option value="5" data-th="5 นาที" data-en="5 min">5 นาที</option>
+        <option value="15" selected data-th="15 นาที" data-en="15 min">15 นาที</option>
+        <option value="30" data-th="30 นาที" data-en="30 min">30 นาที</option>
+        <option value="60" data-th="1 ชั่วโมง" data-en="1 hour">1 ชั่วโมง</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="btnEnable" data-th="เปิดแจ้งเตือนในเบราว์เซอร์" data-en="Enable browser notifications">เปิดแจ้งเตือนในเบราว์เซอร์</button>
+      <button class="btn" id="btnTest" data-th="ทดสอบแจ้งเตือน" data-en="Test notification">ทดสอบแจ้งเตือน</button>
+      <button class="btn" id="btnIcs" data-th="📅 ใส่ในปฏิทินมือถือ (.ics)" data-en="📅 Add to phone calendar (.ics)">📅 ใส่ในปฏิทินมือถือ (.ics)</button>
+      <button class="btn" id="btnPrint" data-th="🖨️ พิมพ์ A4" data-en="🖨️ Print A4">🖨️ พิมพ์ A4</button>
+    </div>
+  </section>
+
+  <div class="months" id="grid"></div>
+
+  <div class="holwrap">
+    <h4 data-th="★ วันหยุดราชการที่เป็น Off-Peak เต็มวัน — ปี 2569" data-en="★ Public holidays with full-day Off-Peak — 2026">★ วันหยุดราชการที่เป็น Off-Peak เต็มวัน — ปี 2569</h4>
+    <div class="hollist" id="hollist"></div>
+  </div>
+
+  <p class="note" data-th="Off-Peak มาตรฐาน = จ–ศ เวลา 22:00–09:00 และ เสาร์–อาทิตย์–วันหยุดราชการ ตลอด 24 ชม. · ไม่รวมวันหยุดชดเชย / วันพืชมงคล / วันหยุดพิเศษตามมติ ครม. · ปี 2569 วัน Off-Peak ของ PEA และ MEA ตรงกันทุกวัน (31 พ.ค. / 5 ธ.ค. ตรงวันหยุดสุดสัปดาห์อยู่แล้ว) · ข้อมูลนี้เป็นเพียงตัวช่วย โปรดตรวจสอบกับการไฟฟ้าของคุณอีกครั้ง"
+     data-en="Standard Off-Peak = Mon–Fri 22:00–09:00 and Sat, Sun and public holidays 24 h · Substitute holidays, Royal Ploughing Day and special cabinet holidays are excluded · In 2026 PEA and MEA Off-Peak days match on every day · This is a helper only; confirm with your utility.">Off-Peak มาตรฐาน = จ–ศ เวลา 22:00–09:00 และ เสาร์–อาทิตย์–วันหยุดราชการ ตลอด 24 ชม.</p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Overdrive Labs</span>
+    <span><a href="index.html" data-th="หน้าแรก" data-en="Home">หน้าแรก</a> · <a href="feedback.html?app=TOU%20Calendar">Feedback</a> · <a href="terms.html" data-th="ข้อตกลงการใช้งาน" data-en="Terms">ข้อตกลงการใช้งาน</a></span>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+/* ============ Data ============ */
+var YEAR = 2026; // ค.ศ. (พ.ศ. 2569)
+var monthsTH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+var monthsShortTH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+var monthsEN = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+var monthHue = ['#0984e3','#e84393','#00b894','#ff7675','#fdcb6e','#6c5ce7','#00cec9','#e17055','#a29bfe','#fd79a8','#74b9ff','#55efc4'];
+var dowTH = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+
+// "M-D" -> holiday name (public holidays that are full-day Off-Peak)
+var holidays = {
+  '1-1':'วันขึ้นปีใหม่',
+  '3-3':'วันมาฆบูชา',
+  '4-6':'วันจักรี',
+  '4-13':'วันสงกรานต์', '4-14':'วันสงกรานต์', '4-15':'วันสงกรานต์',
+  '5-1':'วันแรงงานแห่งชาติ',
+  '5-4':'วันฉัตรมงคล',
+  '5-31':'วันวิสาขบูชา',
+  '6-3':'วันเฉลิมฯ สมเด็จพระนางเจ้าฯ พระบรมราชินี',
+  '7-28':'วันเฉลิมฯ ในหลวง ร.10',
+  '7-29':'วันอาสาฬหบูชา',
+  '7-30':'วันเข้าพรรษา',
+  '8-12':'วันแม่แห่งชาติ',
+  '10-13':'วันนวมินทรมหาราช (ร.9)',
+  '10-23':'วันปิยมหาราช',
+  '12-5':'วันพ่อแห่งชาติ / วันชาติ',
+  '12-10':'วันรัฐธรรมนูญ',
+  '12-31':'วันสิ้นปี'
+};
+
+/* ============ Tariff logic ============ */
+function key(d){ return (d.getMonth()+1)+'-'+d.getDate(); }
+function isHoliday(d){ return d.getFullYear()===YEAR && !!holidays[key(d)]; }
+function isFullOffDay(d){ var w=d.getDay(); return w===0 || w===6 || isHoliday(d); }
+function isOffPeak(d){ if(isFullOffDay(d)) return true; var h=d.getHours(); return h<9 || h>=22; }
+function at(d,h){ return new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, 0, 0, 0); }
+function addDays(d,n){ var x=new Date(d); x.setDate(x.getDate()+n); return x; }
+
+// Next moment the tariff flips, and what it flips to
+function nextChange(now){
+  // Walk forward day by day; on a working day the tariff can flip at 09:00 (to peak)
+  // and 22:00 (to off). The first flip after `now` that differs from the current
+  // state is the answer. Full Off-Peak days have no flips at all.
+  var offNow = isOffPeak(now), start = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  for (var i=0;i<400;i++){
+    var day = addDays(start, i);
+    if(isFullOffDay(day)) continue;
+    var flips = [{t:at(day,9), to:'peak'}, {t:at(day,22), to:'off'}];
+    for (var c=0;c<flips.length;c++){
+      if(flips[c].t > now && (flips[c].to==='peak') === offNow) return flips[c];
+    }
+  }
+  return null;
+}
+
+function fmtDur(ms){
+  var m = Math.max(0, Math.round(ms/60000)), h = Math.floor(m/60); m = m%60;
+  var th = OV.lang()==='th';
+  if(h>0) return th ? (h+' ชม. '+m+' นาที') : (h+' h '+m+' min');
+  return th ? (m+' นาที') : (m+' min');
+}
+function pad(n){ return (n<10?'0':'')+n; }
+function hhmm(d){ return pad(d.getHours())+':'+pad(d.getMinutes()); }
+function dateTH(d){ return d.getDate()+' '+monthsShortTH[d.getMonth()]; }
+
+function renderStatus(){
+  var now = new Date(), off = isOffPeak(now), nx = nextChange(now), th = OV.lang()==='th';
+  var el = document.getElementById('status');
+  el.className = 'status ' + (off?'off':'on');
+  var reason = isHoliday(now) ? ('★ '+holidays[key(now)]) : (now.getDay()===0||now.getDay()===6) ? (th?'วันหยุดสุดสัปดาห์':'Weekend') : '';
+  document.getElementById('stBig').textContent = off
+    ? (th ? '🟢 ตอนนี้ OFF-PEAK · ค่าไฟถูก' : '🟢 OFF-PEAK now · cheap')
+    : (th ? '🔴 ตอนนี้ ON-PEAK · ค่าไฟแพง' : '🔴 ON-PEAK now · expensive');
+  var nextTxt = '';
+  if(nx){
+    var sameDay = nx.t.toDateString()===now.toDateString();
+    var when = (sameDay ? '' : dateTH(nx.t)+' ') + hhmm(nx.t);
+    nextTxt = (th ? (nx.to==='peak' ? 'จะเข้า Peak เวลา ' : 'จะเข้า Off-Peak เวลา ') : (nx.to==='peak' ? 'Peak starts at ' : 'Off-Peak starts at '))
+      + when + ' · ' + (th?'อีก ':'in ') + fmtDur(nx.t-now);
+  }
+  document.getElementById('stNext').textContent = (reason ? reason+' · ' : '') + nextTxt;
+  document.getElementById('stClock').textContent = hhmm(now);
+}
+
+/* ============ Calendar ============ */
+function buildCalendar(){
+  var grid = document.getElementById('grid'); grid.innerHTML='';
+  var today = new Date();
+  for(var m=0;m<12;m++){
+    var first = new Date(YEAR,m,1).getDay(), days = new Date(YEAR,m+1,0).getDate();
+    var rows = '<tr>'; for(var i=0;i<first;i++) rows += '<td></td>';
+    for(var d=1; d<=days; d++){
+      var dt = new Date(YEAR,m,d), dow = dt.getDay(), k=(m+1)+'-'+d, cls='';
+      if(holidays[k]) cls='hol'; else if(dow===0||dow===6) cls='off';
+      if(today.getFullYear()===YEAR && today.getMonth()===m && today.getDate()===d) cls += ' today';
+      rows += '<td class="'+cls+'"'+(holidays[k]?' title="'+holidays[k]+'"':'')+'><span class="d">'+d+'</span></td>';
+      if(dow===6 && d<days) rows += '</tr><tr>';
+    }
+    rows += '</tr>';
+    var head='<tr>'; for(var w=0;w<7;w++) head += '<th class="'+(w===0?'sun':w===6?'sat':'')+'">'+dowTH[w]+'</th>'; head+='</tr>';
+    var cur = (today.getFullYear()===YEAR && today.getMonth()===m) ? ' cur' : '';
+    grid.insertAdjacentHTML('beforeend',
+      '<div class="m'+cur+'"><h3 style="background:linear-gradient(135deg,'+monthHue[m]+','+monthHue[m]+'cc)">'+monthsTH[m]+'<small>'+monthsEN[m]+'</small></h3><table>'+head+rows+'</table></div>');
+  }
+  var hl = document.getElementById('hollist'), seen={}; hl.innerHTML='';
+  Object.keys(holidays).forEach(function(k){
+    var name = holidays[k]; if(seen[name]) return; seen[name]=true;
+    var p = k.split('-'), mm=+p[0], dd=+p[1];
+    var ds = dd+' '+monthsShortTH[mm-1]; if(name==='วันสงกรานต์') ds='13–15 เม.ย.';
+    hl.insertAdjacentHTML('beforeend','<span><b>'+ds+'</b> · '+name+'</span>');
+  });
+}
+
+/* ============ Notifications ============ */
+var SK = 'tou-notify';
+function loadSettings(){
+  var s = { off:true, peak:true, eve:true, lead:15, enabled:false };
+  try { var j = JSON.parse(localStorage.getItem(SK)||'{}'); for(var k in j) s[k]=j[k]; } catch(e){}
+  return s;
+}
+function saveSettings(s){ try{ localStorage.setItem(SK, JSON.stringify(s)); }catch(e){} }
+var settings = loadSettings();
+document.getElementById('optOff').checked = settings.off;
+document.getElementById('optPeak').checked = settings.peak;
+document.getElementById('optEve').checked = settings.eve;
+document.getElementById('lead').value = String(settings.lead);
+['optOff','optPeak','optEve','lead'].forEach(function(id){
+  document.getElementById(id).addEventListener('change', function(){
+    settings.off = document.getElementById('optOff').checked;
+    settings.peak = document.getElementById('optPeak').checked;
+    settings.eve = document.getElementById('optEve').checked;
+    settings.lead = +document.getElementById('lead').value;
+    saveSettings(settings);
+  });
+});
+
+function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},4000); }
+
+function permState(){ return ('Notification' in window) ? Notification.permission : 'unsupported'; }
+function renderPerm(){
+  var p = permState(), pill = document.getElementById('permPill'), th=OV.lang()==='th';
+  pill.className = 'pill ' + (p==='granted'?'ok':p==='denied'?'bad':'');
+  pill.textContent = p==='granted' ? (th?'เปิดอยู่':'On') : p==='denied' ? (th?'ถูกบล็อก':'Blocked') : p==='unsupported' ? (th?'ไม่รองรับ':'Unsupported') : (th?'ยังไม่เปิด':'Off');
+  document.getElementById('btnEnable').hidden = (p==='granted');
+}
+function notify(title, body){
+  if(permState()==='granted'){
+    try {
+      if(navigator.serviceWorker && navigator.serviceWorker.controller){
+        navigator.serviceWorker.ready.then(function(r){ r.showNotification(title,{body:body, icon:'assets/icon-192.png', tag:'tou-'+title, renotify:true, vibrate:[200,100,200]}); });
+      } else { new Notification(title,{body:body}); }
+      return;
+    } catch(e){}
+  }
+  toast(title+' — '+body);
+}
+
+document.getElementById('btnEnable').addEventListener('click', function(){
+  if(!('Notification' in window)){ toast(OV.lang()==='th'?'เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน ใช้ปุ่มใส่ในปฏิทินแทน':'Notifications are not supported here. Use the calendar file instead.'); return; }
+  Notification.requestPermission().then(function(p){
+    settings.enabled = (p==='granted'); saveSettings(settings); renderPerm();
+    if(p==='granted') notify(OV.lang()==='th'?'เปิดแจ้งเตือน TOU แล้ว':'TOU reminders enabled', OV.lang()==='th'?'เราจะเตือนก่อนช่วงค่าไฟเปลี่ยน':'We will remind you before the tariff changes');
+  });
+});
+document.getElementById('btnTest').addEventListener('click', function(){
+  var now=new Date(), nx=nextChange(now), th=OV.lang()==='th';
+  notify(th?'ทดสอบแจ้งเตือน TOU':'TOU test notification', nx ? ((th?'เปลี่ยนเป็น ':'Next: ')+(nx.to==='peak'?'Peak':'Off-Peak')+' '+hhmm(nx.t)+' · '+fmtDur(nx.t-now)) : '');
+});
+document.getElementById('btnPrint').addEventListener('click', function(){ window.print(); });
+
+// Scheduler: check every 30 s; fire each reminder once (keyed by event time)
+var fired = {}; try { fired = JSON.parse(sessionStorage.getItem('tou-fired')||'{}'); } catch(e){}
+function tick(){
+  renderStatus();
+  var now = new Date(), th = OV.lang()==='th', lead = settings.lead*60000;
+  var day = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var checks = [];
+  if(!isFullOffDay(day)){
+    if(settings.peak) checks.push({t:at(day,9), id:'peak-'+day.toDateString(), title: th?'🔴 อีก '+settings.lead+' นาที เข้าช่วง Peak (09:00)':'🔴 Peak starts in '+settings.lead+' min (09:00)', body: th?'ค่าไฟจะแพงขึ้น ถอดสายชาร์จ / เลื่อนงานที่ใช้ไฟมาก':'Electricity gets expensive — unplug or postpone heavy loads'});
+    if(settings.off) checks.push({t:at(day,22), id:'off-'+day.toDateString(), title: th?'🟢 อีก '+settings.lead+' นาที เข้าช่วง Off-Peak (22:00)':'🟢 Off-Peak starts in '+settings.lead+' min (22:00)', body: th?'ค่าไฟถูกลง เตรียมเสียบชาร์จได้เลย':'Cheap electricity — get ready to plug in'});
+  }
+  var tmr = addDays(day,1);
+  if(settings.eve && isFullOffDay(tmr)) checks.push({t:at(day,20), id:'eve-'+day.toDateString(), lead:0, title: th?'🟢 พรุ่งนี้ Off-Peak ทั้งวัน':'🟢 Tomorrow is Off-Peak all day', body: (isHoliday(tmr)?'★ '+holidays[key(tmr)]:(th?'วันหยุดสุดสัปดาห์':'Weekend'))+(th?' · ชาร์จได้ตลอด 24 ชม.':' · cheap rate for 24 h')});
+  checks.forEach(function(c){
+    var l = (c.lead===0) ? 0 : lead, fireAt = c.t - l;
+    if(now >= fireAt && now < c.t + 60000 && !fired[c.id]){
+      fired[c.id]=1; try{ sessionStorage.setItem('tou-fired', JSON.stringify(fired)); }catch(e){}
+      notify(c.title, c.body);
+    }
+  });
+}
+
+/* ============ ICS export (reminders that work with the site closed) ============ */
+function icsDate(d){ return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()); }
+function icsDT(d){ return icsDate(d)+'T'+pad(d.getHours())+pad(d.getMinutes())+'00'; }
+function esc(s){ return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); }
+function buildICS(){
+  var L = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Overdrive Labs//TOU Calendar '+YEAR+'//TH','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+    'X-WR-CALNAME:TOU Off-Peak '+(YEAR+543),'X-WR-TIMEZONE:Asia/Bangkok',
+    'BEGIN:VTIMEZONE','TZID:Asia/Bangkok','BEGIN:STANDARD','DTSTART:19700101T000000','TZOFFSETFROM:+0700','TZOFFSETTO:+0700','TZNAME:ICT','END:STANDARD','END:VTIMEZONE'];
+  var lead = settings.lead, stamp = icsDT(new Date())+'Z';
+  function ev(uid, dtstart, dtend, allDay, summary, desc, alarmTrig){
+    L.push('BEGIN:VEVENT','UID:'+uid+'@overdrivelabs.tou','DTSTAMP:'+stamp);
+    if(allDay){ L.push('DTSTART;VALUE=DATE:'+dtstart,'DTEND;VALUE=DATE:'+dtend); }
+    else { L.push('DTSTART;TZID=Asia/Bangkok:'+dtstart,'DTEND;TZID=Asia/Bangkok:'+dtend); }
+    L.push('SUMMARY:'+esc(summary),'DESCRIPTION:'+esc(desc),'TRANSP:TRANSPARENT');
+    if(alarmTrig){ L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc(summary),'TRIGGER:'+alarmTrig,'END:VALARM'); }
+    L.push('END:VEVENT');
+  }
+  for(var m=0;m<12;m++){
+    var days = new Date(YEAR,m+1,0).getDate();
+    for(var d=1; d<=days; d++){
+      var dt = new Date(YEAR,m,d), k=(m+1)+'-'+d;
+      if(isFullOffDay(dt)){
+        var nm = holidays[k] ? '★ '+holidays[k]+' · Off-Peak ทั้งวัน' : 'Off-Peak ทั้งวัน';
+        var nxt = addDays(dt,1);
+        // Alarm at 20:00 the evening before (all-day event starts 00:00 → -PT4H)
+        ev('offday-'+icsDate(dt), icsDate(dt), icsDate(nxt), true, nm, 'ค่าไฟถูกตลอด 24 ชม. (TOU Off-Peak)', settings.eve ? '-PT4H' : null);
+      } else {
+        if(settings.off) ev('off-'+icsDate(dt), icsDT(at(dt,22)), icsDT(at(dt,23)), false, '🟢 Off-Peak เริ่ม 22:00', 'ค่าไฟถูกจนถึง 09:00 เช้าวันถัดไป', '-PT'+lead+'M');
+        if(settings.peak) ev('peak-'+icsDate(dt), icsDT(at(dt,9)), icsDT(at(dt,10)), false, '🔴 Peak เริ่ม 09:00', 'ค่าไฟแพงจนถึง 22:00', '-PT'+lead+'M');
+      }
+    }
+  }
+  L.push('END:VCALENDAR');
+  return L.join('\r\n');
+}
+document.getElementById('btnIcs').addEventListener('click', function(){
+  var blob = new Blob([buildICS()], {type:'text/calendar;charset=utf-8'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'TOU-OffPeak-'+(YEAR+543)+'.ics';
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  toast(OV.lang()==='th' ? 'ดาวน์โหลดแล้ว เปิดไฟล์เพื่อเพิ่มลงปฏิทิน (Google Calendar / iPhone)' : 'Downloaded — open the file to add it to your calendar');
+});
+
+/* ============ Boot ============ */
+buildCalendar();
+renderPerm();
+tick();
+setInterval(tick, 30000);
+setInterval(renderStatus, 10000);
+document.getElementById('langToggle').addEventListener('click', function(){ setTimeout(function(){ renderStatus(); renderPerm(); }, 0); });
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
+</script>
+</body>
+</html>
