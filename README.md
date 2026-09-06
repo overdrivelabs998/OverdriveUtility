@@ -6,7 +6,7 @@ support pages. Served by GitHub Pages at
 
 | Page | File | What it is |
 |---|---|---|
-| Home | `index.html` | Hub listing apps (DriveMeter, DriveVolt, OBD2 Easy) and games (Pixel Putt) |
+| Home | `index.html` | Hub listing apps (DriveMeter, DriveVolt, OBD2 Easy), web tools and games (coming soon) |
 | TOU Calendar | `tou.html` | ปฏิทิน Off-Peak TOU 2569 — mobile-friendly, live Peak/Off-Peak status, browser reminders, `.ics` export, print A4 |
 | Connect | `connect.html` | Store links, privacy policies, contact channels, deep-link parameters |
 | Feedback | `feedback.html` | Bug / suggestion form — opens the visitor's email app, nothing is collected |
