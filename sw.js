@@ -2,7 +2,7 @@
    Caches the site shell so tou.html opens offline and can be installed as an app.
    Notifications are shown by the page through registration.showNotification();
    there is no push server — nothing leaves the device. */
-var CACHE = "ov-utility-v8";
+var CACHE = "ov-utility-v9";
 var SHELL = ["./", "./index.html", "./tou.html", "./connect.html", "./feedback.html", "./terms.html",
              "./assets/style.css", "./assets/site.js", "./manifest.webmanifest",
              "./assets/icon-192.png", "./assets/icon-512.png", "./assets/logo.png"];

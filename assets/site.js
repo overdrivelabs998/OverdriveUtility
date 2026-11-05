@@ -3,11 +3,13 @@
 (function () {
   var KEY = "ov-lang";
 
+  // Priority: ?lang= in the URL > a choice made with the toggle during this visit > the device language.
+  // Device language wins on every new visit; Thai devices get Thai, everything else English.
   function pick() {
     try { var q = new URLSearchParams(location.search).get("lang"); if (q === "th" || q === "en") return q; } catch (e) {}
-    try { var s = localStorage.getItem(KEY); if (s === "th" || s === "en") return s; } catch (e) {}
-    var l = (navigator.language || "en").toLowerCase();
-    return l.indexOf("th") === 0 ? "th" : "en";
+    try { var s = sessionStorage.getItem(KEY); if (s === "th" || s === "en") return s; } catch (e) {}
+    var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || "en"];
+    return String(langs[0]).toLowerCase().indexOf("th") === 0 ? "th" : "en";
   }
 
   function apply(lang) {
@@ -29,10 +31,11 @@
     if (t) { t.innerHTML = '<span data-l="th">ไทย</span><span data-l="en">EN</span>'; t.querySelector('[data-l="' + lang + '"]').className = "on"; t.setAttribute("aria-label", lang === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"); }
   }
 
+  try { localStorage.removeItem(KEY); } catch (e) {}
   var current = pick();
   window.OV = {
     lang: function () { return current; },
-    set: function (l) { current = l; try { localStorage.setItem(KEY, l); } catch (e) {} apply(l); }
+    set: function (l) { current = l; try { sessionStorage.setItem(KEY, l); } catch (e) {} apply(l); }
   };
 
   document.addEventListener("DOMContentLoaded", function () {
