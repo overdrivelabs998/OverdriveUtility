@@ -26,7 +26,7 @@
       else only[j].setAttribute("data-lang-hidden", "");
     }
     var t = document.getElementById("langToggle");
-    if (t) t.textContent = lang === "th" ? "EN" : "ไทย";
+    if (t) { t.innerHTML = '<span data-l="th">ไทย</span><span data-l="en">EN</span>'; t.querySelector('[data-l="' + lang + '"]').className = "on"; t.setAttribute("aria-label", lang === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"); }
   }
 
   var current = pick();
@@ -37,7 +37,8 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     apply(current);
-    var t = document.getElementById("langToggle");
+    var t = document.getElementById("langToggle"), mb = document.getElementById("menuBtn");
+    if (t && mb) mb.parentNode.appendChild(t);
     if (t) t.addEventListener("click", function () { window.OV.set(current === "th" ? "en" : "th"); });
     var m = document.getElementById("menuBtn"), links = document.getElementById("navLinks");
     if (m && links) m.addEventListener("click", function () { links.classList.toggle("open"); });

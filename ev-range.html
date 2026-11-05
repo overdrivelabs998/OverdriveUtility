@@ -80,11 +80,23 @@
 
   <div class="box">
     <h3 data-th="💸 ค่าชาร์จ" data-en="💸 Charging cost">💸 ค่าชาร์จ</h3>
-    <div class="row2">
-      <div><label for="to" data-th="ชาร์จถึง (%)" data-en="Charge to (%)">ชาร์จถึง (%)</label><input id="to" type="number" min="1" max="100" value="100" inputmode="numeric"></div>
-      <div><label for="price" data-th="ราคาไฟ (บาท/kWh)" data-en="Price (THB/kWh)">ราคาไฟ (บาท/kWh)</label>
-        <input id="price" type="number" step="0.01" min="0" value="3.00" inputmode="decimal"></div>
+    <label data-th="ช่วงที่จะชาร์จ (ลากปุ่มเพื่อเลือก % เริ่มต้น → สิ้นสุด)" data-en="Charging window (drag to pick start → end %)">ช่วงที่จะชาร์จ</label>
+    <div class="range-head"><span class="pill" id="fromLbl">20%</span><span class="arrow">→</span><span class="pill end" id="toLbl">100%</span></div>
+    <div class="dual">
+      <div class="track"><i id="rangeFill"></i></div>
+      <input id="from" type="range" min="0" max="100" step="1" value="20" aria-label="Start %">
+      <input id="to" type="range" min="0" max="100" step="1" value="100" aria-label="End %">
     </div>
+    <div class="ticks"><span>0%</span><span>20%</span><span>50%</span><span>80%</span><span>100%</span></div>
+    <div class="chips" id="rangeChips">
+      <button type="button" data-r="20-80">20 → 80%</button>
+      <button type="button" data-r="10-100">10 → 100%</button>
+      <button type="button" data-r="0-100" data-th="0 → 100% (เต็มแบต)" data-en="0 → 100% (full)">0 → 100%</button>
+      <button type="button" data-r="now-80" data-th="ตอนนี้ → 80%" data-en="Now → 80%">ตอนนี้ → 80%</button>
+      <button type="button" data-r="now-100" data-th="ตอนนี้ → 100%" data-en="Now → 100%">ตอนนี้ → 100%</button>
+    </div>
+    <label for="price" data-th="ราคาไฟ (บาท/kWh)" data-en="Price (THB/kWh)">ราคาไฟ (บาท/kWh)</label>
+    <input id="price" type="number" step="0.01" min="0" value="3.00" inputmode="decimal">
     <div class="chips">
       <button type="button" data-p="3.00" data-th="บ้าน TOU Off-Peak ~3.0" data-en="Home TOU off-peak ~3.0">บ้าน TOU Off-Peak ~3.0</button>
       <button type="button" data-p="4.30" data-th="บ้าน อัตราปกติ ~4.3" data-en="Home normal ~4.3">บ้าน อัตราปกติ ~4.3</button>
@@ -92,7 +104,17 @@
     </div>
     <label for="loss" data-th="การสูญเสียระหว่างชาร์จ" data-en="Charging losses">การสูญเสียระหว่างชาร์จ</label>
     <select id="loss"><option value="1.12" data-th="ชาร์จ AC ที่บ้าน (~12%)" data-en="AC home charging (~12%)">ชาร์จ AC ที่บ้าน (~12%)</option><option value="1.05" data-th="ชาร์จเร็ว DC (~5%)" data-en="DC fast charging (~5%)">ชาร์จเร็ว DC (~5%)</option></select>
-    <p id="costMsg" class="result-msg"></p>
+    <div class="price-card">
+      <small data-th="ค่าชาร์จช่วงนี้ประมาณ" data-en="Estimated cost for this charge">ค่าชาร์จช่วงนี้ประมาณ</small>
+      <div class="price-big"><b id="oCost">–</b> <span data-th="บาท" data-en="THB">บาท</span></div>
+      <div class="price-grid">
+        <div><b id="oAdd">–</b><span data-th="kWh เข้าแบต" data-en="kWh into battery">kWh เข้าแบต</span></div>
+        <div><b id="oGrid">–</b><span data-th="kWh จากปลั๊ก" data-en="kWh from the wall">kWh จากปลั๊ก</span></div>
+        <div><b id="oKm">–</b><span data-th="กม. ที่ได้เพิ่ม" data-en="km added">กม. ที่ได้เพิ่ม</span></div>
+        <div><b id="oPerKm">–</b><span data-th="บาท/กม." data-en="THB/km">บาท/กม.</span></div>
+      </div>
+      <div class="compare" id="cmp"></div>
+    </div>
   </div>
 
   <p class="note" data-th="ผลลัพธ์เป็นค่าประมาณ ระยะทางจริงขึ้นกับความเร็ว อุณหภูมิ สภาพถนน ยาง และอายุแบต ค่าเริ่มต้นของแต่ละรุ่นเป็นตัวเลขโดยประมาณจากการใช้งานจริง แนะนำให้ใส่ค่าสิ้นเปลืองจากหน้าจอรถของคุณเองเพื่อความแม่นยำ"
@@ -126,12 +148,20 @@ function calc(){
   if(arrive>=res){b.style.background="var(--volt)";m.innerHTML=(th?"✅ ไปถึงได้ เหลือแบตประมาณ <b>":"✅ You'll make it, arriving with about <b>")+fmt(arrive)+"%</b>"+(th?" (ใช้ไป "+fmt(need)+"%)":" (uses "+fmt(need)+"%)")}
   else if(arrive>0){b.style.background="var(--accent)";m.innerHTML=(th?"⚠️ ไปถึงได้แต่ต่ำกว่าระดับสำรอง เหลือ <b>":"⚠️ Possible but below your reserve: <b>")+fmt(arrive)+"%</b>"+(th?" แนะนำแวะชาร์จระหว่างทาง":". Consider a charging stop.")}
   else{b.style.background="#e63946";var stop=Math.ceil((need-(soc-res))*per);m.innerHTML=(th?"❌ ไม่พอ ต้องชาร์จเพิ่มระหว่างทางอีกประมาณ <b>":"❌ Not enough. You need about <b>")+fmt(stop)+(th?" กม.</b> หรือแวะชาร์จหลังวิ่งไปไม่เกิน <b>":" km</b> more; stop to charge within <b>")+fmt(Math.max(0,range))+(th?" กม.</b>":" km</b>.")}
-  var to=Math.min(100,Math.max(0,n("to"))),add=Math.max(0,to-soc)/100*bat,grid=add*parseFloat($("loss").value),cost=grid*n("price"),c=$("costMsg");
-  if(add<=0){c.textContent=th?"แบตตอนนี้สูงกว่าเป้าหมายแล้ว":"Battery is already above the target."}
-  else c.innerHTML=(th?"ชาร์จ "+fmt(soc)+"% → "+fmt(to)+"% เข้าแบต <b>":"Charging "+fmt(soc)+"% → "+fmt(to)+"% adds <b>")+fmt(add,1)+" kWh</b>"+(th?" (ดึงจากปลั๊ก ~":" (~")+fmt(grid,1)+(th?" kWh) ค่าไฟประมาณ <b>":" kWh from the wall), costing about <b>")+fmt(cost)+(th?" บาท</b> · ได้ระยะเพิ่ม ~":" THB</b> · adds ~")+fmt(add/eff*100)+(th?" กม. · เฉลี่ย ":" km · ")+fmt(cost/(add/eff*100),2)+(th?" บาท/กม.":" THB/km");
+  var fr=parseInt($("from").value,10),to=parseInt($("to").value,10);
+  $("fromLbl").textContent=fr+"%";$("toLbl").textContent=to+"%";
+  $("rangeFill").style.left=fr+"%";$("rangeFill").style.width=(to-fr)+"%";
+  var add=(to-fr)/100*bat,loss=parseFloat($("loss").value),grid=add*loss,price=n("price"),cost=grid*price,km=add/eff*100;
+  $("oCost").textContent=fmt(cost);$("oAdd").textContent=fmt(add,1);$("oGrid").textContent=fmt(grid,1);$("oKm").textContent=fmt(km);$("oPerKm").textContent=km>0?fmt(cost/km,2):"–";
+  var P=[[th?"บ้าน TOU Off-Peak":"Home TOU off-peak",3.0],[th?"บ้าน อัตราปกติ":"Home normal",4.3],[th?"ตู้ DC สาธารณะ":"Public DC",7.5]];
+  $("cmp").innerHTML=P.map(function(p){var l=p[1]===7.5?1.05:1.12;return "<div><span>"+p[0]+"</span><b>"+fmt(add*l*p[1])+(th?" บาท":" THB")+"</b></div>"}).join("");
 }
 sel.addEventListener("change",load);
-document.querySelectorAll("input,select").forEach(function(e){if(e!==sel)e.addEventListener("input",calc)});
+$("from").addEventListener("input",function(){if(+this.value>+$("to").value)$("to").value=this.value;calc()});
+$("to").addEventListener("input",function(){if(+this.value<+$("from").value)$("from").value=this.value;calc()});
+document.querySelectorAll("#rangeChips button").forEach(function(b){b.addEventListener("click",function(){var r=b.dataset.r.split("-"),f=r[0]==="now"?Math.round(n("soc")):+r[0];$("from").value=Math.min(f,+r[1]);$("to").value=r[1];calc()})});
+$("soc").addEventListener("input",function(){var v=Math.round(n("soc"));$("from").value=v;if(+$("to").value<v)$("to").value=v;});
+document.querySelectorAll("input,select").forEach(function(e){if(e!==sel&&e.type!=="range")e.addEventListener("input",calc)});
 document.querySelectorAll(".chips button").forEach(function(b){b.addEventListener("click",function(){$("price").value=b.dataset.p;calc()})});
 $("langToggle").addEventListener("click",function(){setTimeout(calc,0)});
 load();

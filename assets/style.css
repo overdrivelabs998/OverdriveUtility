@@ -28,11 +28,12 @@ header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, v
 .nav-links a:hover, .nav-links a.active { color: var(--fg); background: var(--bg2); text-decoration: none; }
 .lang-toggle { border: 1px solid var(--line); background: var(--bg2); color: var(--fg); border-radius: 999px; padding: 5px 12px; font: inherit; font-size: .85em; font-weight: 700; cursor: pointer; margin-left: 6px; }
 .menu-btn { display: none; margin-left: auto; background: none; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); font-size: 1.2em; padding: 3px 10px; cursor: pointer; }
-@media (max-width: 720px) {
+@media (max-width: 960px) {
   .menu-btn { display: block; }
   .nav-links { display: none; position: absolute; left: -20px; right: -20px; top: 60px; flex-direction: column; align-items: stretch; background: var(--bg2); border-bottom: 1px solid var(--line); padding: 10px 16px 14px; gap: 2px; }
   .nav-links.open { display: flex; }
-  .lang-toggle { margin: 8px 0 0; align-self: flex-start; }
+  .lang-toggle { margin-left: auto; order: 2; }
+  .menu-btn { margin-left: 8px !important; order: 3; flex-shrink: 0; }
 }
 
 /* Hero */
@@ -112,4 +113,38 @@ footer a { color: var(--muted); }
 .chips button:hover { border-color: var(--accent); }
 .note { font-size: .88em; color: var(--muted); }
 details.box summary { cursor: pointer; font-weight: 700; }
+/* Dual range slider + price card */
+.range-head { display: flex; align-items: center; gap: 10px; margin: 4px 0 6px; }
+.range-head .pill { font-weight: 800; font-size: 1.25em; padding: 4px 14px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-variant-numeric: tabular-nums; }
+.range-head .pill.end { background: color-mix(in srgb, var(--volt) 16%, transparent); color: var(--volt); }
+.range-head .arrow { color: var(--muted); font-weight: 700; }
+.dual { position: relative; height: 34px; }
+.dual .track { position: absolute; left: 0; right: 0; top: 13px; height: 8px; border-radius: 999px; background: var(--line); }
+.dual .track i { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--volt)); }
+.dual input[type=range] { position: absolute; inset: 0; width: 100%; margin: 0; padding: 0; border: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; height: 34px; }
+.dual input[type=range]::-webkit-slider-runnable-track { background: none; height: 34px; }
+.dual input[type=range]::-moz-range-track { background: none; }
+.dual input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 26px; height: 26px; margin-top: 4px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-shadow: 0 2px 6px rgba(0,0,0,.25); cursor: grab; }
+.dual input#to::-webkit-slider-thumb { border-color: var(--volt); }
+.dual input[type=range]::-moz-range-thumb { pointer-events: auto; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); cursor: grab; }
+.dual input#to::-moz-range-thumb { border-color: var(--volt); }
+.ticks { display: flex; justify-content: space-between; font-size: .75em; color: var(--muted); margin-top: 2px; }
+.price-card { margin-top: 18px; border-radius: var(--radius); padding: 18px 18px 14px; background: linear-gradient(135deg, color-mix(in srgb, var(--volt) 14%, var(--bg2)), var(--bg2)); border: 2px solid var(--volt); }
+.price-card small { color: var(--muted); font-weight: 700; }
+.price-big { line-height: 1.1; margin: 2px 0 12px; }
+.price-big b { font-size: 3.2em; color: var(--volt); font-variant-numeric: tabular-nums; }
+.price-big span { font-size: 1.3em; font-weight: 700; color: var(--volt); }
+.price-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 520px) { .price-grid { grid-template-columns: repeat(2, 1fr); } }
+.price-grid div { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.price-grid b { display: block; font-size: 1.2em; font-variant-numeric: tabular-nums; }
+.price-grid span { font-size: .78em; color: var(--muted); }
+.compare { margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 8px; }
+.compare div { display: flex; justify-content: space-between; font-size: .92em; padding: 3px 0; }
+.compare span { color: var(--muted); }
+/* Language switch */
+.lang-toggle { display: inline-flex; padding: 3px !important; gap: 2px; }
+.lang-toggle span { padding: 3px 10px; border-radius: 999px; color: var(--muted); }
+.lang-toggle span.on { background: var(--accent); color: #fff; }
+@media (max-width: 480px) { .nav { gap: 8px; } .brand { font-size: .98em; gap: 7px; white-space: nowrap; } .lang-toggle span { padding: 3px 8px; } }
 [data-lang-hidden] { display: none !important; }
