@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-th="คำนวณค่าไฟ TOU – Overdrive Utility" data-en="TOU Electricity Cost Calculator – Overdrive Utility">คำนวณค่าไฟ TOU – Overdrive Utility</title>
+<meta name="description" content="คำนวณค่าไฟอัตรา TOU เทียบกับอัตราปกติ (บ้านอยู่อาศัย PEA/MEA) รวมค่า Ft และ VAT พร้อมคิดค่าชาร์จรถ EV">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><img class="logo" src="assets/logo.png" alt="Overdrive Labs" width="30" height="30"> Overdrive Utility</a>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html#apps" data-th="แอป" data-en="Apps">แอป</a>
+      <a href="index.html#games" data-th="เกม" data-en="Games">เกม</a>
+      <a href="index.html#tools" data-th="เครื่องมือ" data-en="Tools">เครื่องมือ</a>
+      <a href="connect.html" data-th="เชื่อมต่อ" data-en="Connect">เชื่อมต่อ</a>
+      <a href="feedback.html" data-th="รายงาน / Feedback" data-en="Feedback">รายงาน / Feedback</a>
+      <a href="terms.html" data-th="ข้อตกลงการใช้งาน" data-en="Terms">ข้อตกลงการใช้งาน</a>
+      <button class="lang-toggle" id="langToggle">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main class="page" style="max-width: 720px;">
+  <h1>🧮 <span data-th="คำนวณค่าไฟ TOU" data-en="TOU Electricity Cost">คำนวณค่าไฟ TOU</span></h1>
+  <p class="lead" data-th="เปลี่ยนเป็นมิเตอร์ TOU แล้วคุ้มไหม? ใส่การใช้ไฟของบ้านและรถ EV แล้วเทียบค่าไฟ TOU กับอัตราปกติแบบขั้นบันได"
+     data-en="Is a TOU meter worth it? Enter your home and EV usage to compare a TOU bill against the normal tiered tariff.">เปลี่ยนเป็นมิเตอร์ TOU แล้วคุ้มไหม?</p>
+
+  <div class="box">
+    <h3 data-th="🏠 ไฟบ้าน (ต่อเดือน)" data-en="🏠 Household use (per month)">🏠 ไฟบ้าน (ต่อเดือน)</h3>
+    <div class="row2">
+      <div><label for="home" data-th="หน่วยไฟบ้าน (kWh/เดือน) ไม่รวมรถ" data-en="Home kWh / month (excluding EV)">หน่วยไฟบ้าน (kWh/เดือน)</label><input id="home" type="number" min="0" value="350" inputmode="decimal"></div>
+      <div><label for="homeOff" data-th="ใช้ช่วง Off-Peak (%)" data-en="Used in Off-Peak (%)">ใช้ช่วง Off-Peak (%)</label><input id="homeOff" type="number" min="0" max="100" value="55" inputmode="numeric"></div>
+    </div>
+    <p class="note" data-th="Off-Peak = จ–ศ 22:00–09:00 และ ส–อา–วันหยุดราชการทั้งวัน ซึ่งคิดเป็นราว 65% ของชั่วโมงทั้งหมด บ้านที่มีคนอยู่กลางวันมักอยู่ที่ 45–60%" data-en="Off-Peak = Mon–Fri 22:00–09:00 plus weekends and public holidays all day, about 65% of all hours. Homes occupied in the daytime are usually 45–60%.">Off-Peak</p>
+  </div>
+
+  <div class="box">
+    <h3 data-th="🔌 ชาร์จรถ EV ที่บ้าน" data-en="🔌 EV home charging">🔌 ชาร์จรถ EV ที่บ้าน</h3>
+    <div class="row2">
+      <div><label for="km" data-th="ระยะขับต่อเดือน (กม.)" data-en="Distance per month (km)">ระยะขับต่อเดือน (กม.)</label><input id="km" type="number" min="0" value="1500" inputmode="decimal"></div>
+      <div><label for="evEff" data-th="สิ้นเปลือง (kWh/100 กม.)" data-en="Consumption (kWh/100 km)">สิ้นเปลือง (kWh/100 กม.)</label><input id="evEff" type="number" min="0" step="0.1" value="15" inputmode="decimal"></div>
+    </div>
+    <div class="row2">
+      <div><label for="evHome" data-th="ชาร์จที่บ้าน (%)" data-en="Charged at home (%)">ชาร์จที่บ้าน (%)</label><input id="evHome" type="number" min="0" max="100" value="90" inputmode="numeric"></div>
+      <div><label for="evOff" data-th="ชาร์จช่วง Off-Peak (%)" data-en="Charged in Off-Peak (%)">ชาร์จช่วง Off-Peak (%)</label><input id="evOff" type="number" min="0" max="100" value="100" inputmode="numeric"></div>
+    </div>
+    <p class="note" id="evNote"></p>
+  </div>
+
+  <details class="box">
+    <summary data-th="⚙️ อัตราค่าไฟ (แก้ไขได้)" data-en="⚙️ Tariff settings (editable)">⚙️ อัตราค่าไฟ (แก้ไขได้)</summary>
+    <label for="tariff" data-th="ประเภทผู้ใช้ TOU" data-en="TOU tariff type">ประเภทผู้ใช้ TOU</label>
+    <select id="tariff">
+      <option value="low" data-th="บ้านอยู่อาศัย TOU แรงดันต่ำกว่า 22 kV (1.2.2)" data-en="Residential TOU below 22 kV (1.2.2)">บ้านอยู่อาศัย TOU &lt; 22 kV</option>
+      <option value="mid" data-th="บ้านอยู่อาศัย TOU แรงดัน 22–33 kV (1.2.1)" data-en="Residential TOU 22–33 kV (1.2.1)">บ้านอยู่อาศัย TOU 22–33 kV</option>
+    </select>
+    <div class="row2">
+      <div><label for="peak" data-th="Peak (บาท/kWh)" data-en="Peak (THB/kWh)">Peak</label><input id="peak" type="number" step="0.0001" inputmode="decimal"></div>
+      <div><label for="off" data-th="Off-Peak (บาท/kWh)" data-en="Off-Peak (THB/kWh)">Off-Peak</label><input id="off" type="number" step="0.0001" inputmode="decimal"></div>
+    </div>
+    <div class="row2">
+      <div><label for="svcTou" data-th="ค่าบริการ TOU (บาท/เดือน)" data-en="TOU service fee (THB/mo)">ค่าบริการ TOU</label><input id="svcTou" type="number" step="0.01" inputmode="decimal"></div>
+      <div><label for="ft" data-th="ค่า Ft (บาท/kWh)" data-en="Ft (THB/kWh)">ค่า Ft (บาท/kWh)</label><input id="ft" type="number" step="0.0001" value="0.1572" inputmode="decimal"></div>
+    </div>
+    <label><input id="vat" type="checkbox" checked style="width:auto;margin-right:8px"><span data-th="รวม VAT 7%" data-en="Include 7% VAT">รวม VAT 7%</span></label>
+    <p class="note" data-th="อัตราปกติที่ใช้เทียบ: บ้านอยู่อาศัยเกิน 150 หน่วย (1.1.2) — 1–150 หน่วย 3.2484, 151–400 หน่วย 4.2218, 401 หน่วยขึ้นไป 4.4217 บาท + ค่าบริการ 24.62 บาท/เดือน · ค่า Ft ปรับทุก 4 เดือน โปรดตรวจค่าล่าสุดจากบิลของคุณ" data-en="Normal tariff for comparison: residential over 150 units (1.1.2), 3.2484 for units 1–150, 4.2218 for 151–400 and 4.4217 THB above 400, plus a 24.62 THB monthly fee. Ft changes every 4 months; check your latest bill.">อัตราปกติ</p>
+  </details>
+
+  <div class="stats">
+    <div class="stat" style="--c: var(--volt)"><small data-th="ค่าไฟแบบ TOU" data-en="TOU bill">ค่าไฟแบบ TOU</small><b id="oTou">–</b><span data-th="บาท/เดือน" data-en="THB / month">บาท/เดือน</span></div>
+    <div class="stat" style="--c: var(--blue)"><small data-th="ค่าไฟอัตราปกติ" data-en="Normal-tariff bill">ค่าไฟอัตราปกติ</small><b id="oNorm">–</b><span data-th="บาท/เดือน" data-en="THB / month">บาท/เดือน</span></div>
+    <div class="stat big" id="saveBox"><small id="saveLbl"></small><b id="oSave">–</b><span id="saveYear"></span></div>
+  </div>
+
+  <div class="box">
+    <h3 data-th="📋 รายละเอียด" data-en="📋 Breakdown">📋 รายละเอียด</h3>
+    <div class="table-wrap"><table id="tbl"></table></div>
+    <p id="evCost" class="result-msg"></p>
+  </div>
+
+  <p class="note"><a href="tou.html" data-th="📅 ดูปฏิทินวัน Off-Peak เต็มวันปี 2569 →" data-en="📅 See the 2026 full-day Off-Peak calendar →">📅 ดูปฏิทินวัน Off-Peak →</a></p>
+  <p class="note" data-th="เป็นการประมาณการเท่านั้น อัตราอ้างอิงประกาศ กกพ. สำหรับ กฟภ./กฟน. ไม่รวมค่ามิเตอร์ TOU หรือค่าธรรมเนียมเปลี่ยนมิเตอร์ ตัวเลขจริงดูจากบิลค่าไฟของคุณ"
+     data-en="Estimate only. Rates follow ERC tariffs for PEA/MEA and exclude the TOU meter or meter-change fees. Your bill is the final word.">เป็นการประมาณการเท่านั้น</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Overdrive Labs</span>
+    <span><a href="index.html" data-th="หน้าแรก" data-en="Home">หน้าแรก</a> · <a href="connect.html" data-th="เชื่อมต่อ" data-en="Connect">เชื่อมต่อ</a> · <a href="terms.html" data-th="ข้อตกลงการใช้งาน" data-en="Terms">ข้อตกลงการใช้งาน</a></span>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+
+var T={low:{peak:5.7982,off:2.6369,svc:24.62},mid:{peak:5.1135,off:2.6037,svc:312.24}};
+var STEPS=[[150,3.2484],[250,4.2218],[Infinity,4.4217]],SVC_N=24.62;
+function $(i){return document.getElementById(i)}
+function n(i){var v=parseFloat($(i).value);return isNaN(v)?0:v}
+function pc(i){return Math.min(100,Math.max(0,n(i)))/100}
+function fmt(x,d){return x.toLocaleString(OV.lang()==="th"?"th-TH":"en-US",{maximumFractionDigits:d||0,minimumFractionDigits:d||0})}
+function setTariff(){var t=T[$("tariff").value];$("peak").value=t.peak;$("off").value=t.off;$("svcTou").value=t.svc;calc()}
+function calc(){
+  var th=OV.lang()==="th",ft=n("ft"),vat=$("vat").checked?1.07:1;
+  var home=n("home"),evKwh=n("km")*n("evEff")/100*pc("evHome");
+  var hOff=home*pc("homeOff"),hPeak=home-hOff,eOff=evKwh*pc("evOff"),ePeak=evKwh-eOff;
+  var offK=hOff+eOff,peakK=hPeak+ePeak,total=offK+peakK;
+  var touEnergy=peakK*n("peak")+offK*n("off"),touSvc=n("svcTou"),touFt=total*ft,tou=(touEnergy+touSvc+touFt)*vat;
+  var left=total,nEnergy=0;STEPS.forEach(function(s){var u=Math.min(left,s[0]);nEnergy+=u*s[1];left-=u});
+  var norm=(nEnergy+SVC_N+total*ft)*vat,save=norm-tou;
+  $("oTou").textContent=fmt(tou);$("oNorm").textContent=fmt(norm);$("oSave").textContent=fmt(Math.abs(save));
+  var sb=$("saveBox");sb.style.setProperty("--c",save>=0?"var(--volt)":"#e63946");
+  $("saveLbl").textContent=save>=0?(th?"✅ TOU ประหยัดกว่า":"✅ TOU saves you"):(th?"⚠️ อัตราปกติถูกกว่า":"⚠️ Normal tariff is cheaper");
+  $("saveYear").textContent=(th?"บาท/เดือน · ปีละ ~":"THB / month · ~")+fmt(Math.abs(save)*12)+(th?" บาท":" THB / year");
+  $("evNote").textContent=(th?"รถใช้ไฟประมาณ ":"The EV uses about ")+fmt(n("km")*n("evEff")/100)+(th?" kWh/เดือน ชาร์จที่บ้าน ":" kWh/month, of which ")+fmt(evKwh)+(th?" kWh":" kWh is charged at home");
+  var r=function(a,b,c){return "<tr><td>"+a+"</td><td style='text-align:right'>"+b+"</td><td style='text-align:right'>"+c+"</td></tr>"};
+  $("tbl").innerHTML="<tr><th></th><th style='text-align:right'>TOU</th><th style='text-align:right'>"+(th?"อัตราปกติ":"Normal")+"</th></tr>"+
+    r(th?"หน่วย Peak":"Peak units",fmt(peakK)+" kWh","–")+r(th?"หน่วย Off-Peak":"Off-Peak units",fmt(offK)+" kWh","–")+
+    r(th?"รวมหน่วย":"Total units",fmt(total)+" kWh",fmt(total)+" kWh")+
+    r(th?"ค่าพลังงาน":"Energy charge",fmt(touEnergy,2),fmt(nEnergy,2))+r(th?"ค่าบริการ":"Service fee",fmt(touSvc,2),fmt(SVC_N,2))+
+    r("Ft",fmt(touFt,2),fmt(total*ft,2))+r("VAT",fmt((touEnergy+touSvc+touFt)*(vat-1),2),fmt((nEnergy+SVC_N+total*ft)*(vat-1),2))+
+    "<tr><td><b>"+(th?"รวม":"Total")+"</b></td><td style='text-align:right'><b>"+fmt(tou,2)+"</b></td><td style='text-align:right'><b>"+fmt(norm,2)+"</b></td></tr>";
+  var rateEv=evKwh>0?((ePeak*n("peak")+eOff*n("off"))/evKwh+ft)*vat:0;
+  $("evCost").innerHTML=evKwh>0?(th?"🔌 ค่าชาร์จรถเฉลี่ยแบบ TOU ≈ <b>":"🔌 Average TOU charging rate ≈ <b>")+fmt(rateEv,2)+(th?" บาท/kWh</b> · ≈ <b>":" THB/kWh</b> · ≈ <b>")+fmt(rateEv*n("evEff")/100,2)+(th?" บาท/กม.</b> · ค่าชาร์จที่บ้าน ~":" THB/km</b> · home charging ~")+fmt(rateEv*evKwh)+(th?" บาท/เดือน":" THB/month"):"";
+}
+$("tariff").addEventListener("change",setTariff);
+document.querySelectorAll("input,select").forEach(function(e){if(e.id!=="tariff"){e.addEventListener("input",calc);e.addEventListener("change",calc)}});
+$("langToggle").addEventListener("click",function(){setTimeout(calc,0)});
+setTariff();
+
+</script>
+</body>
+</html>

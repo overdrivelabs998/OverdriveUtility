@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-th="คำนวณระยะทางรถ EV – Overdrive Utility" data-en="EV Range Calculator – Overdrive Utility">คำนวณระยะทางรถ EV – Overdrive Utility</title>
+<meta name="description" content="คำนวณระยะทางที่รถไฟฟ้าวิ่งได้จากแบตที่เหลือ อัตราสิ้นเปลือง สภาพการขับ และวางแผนทริป พร้อมค่าชาร์จ">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><img class="logo" src="assets/logo.png" alt="Overdrive Labs" width="30" height="30"> Overdrive Utility</a>
+    <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html#apps" data-th="แอป" data-en="Apps">แอป</a>
+      <a href="index.html#games" data-th="เกม" data-en="Games">เกม</a>
+      <a href="index.html#tools" data-th="เครื่องมือ" data-en="Tools">เครื่องมือ</a>
+      <a href="connect.html" data-th="เชื่อมต่อ" data-en="Connect">เชื่อมต่อ</a>
+      <a href="feedback.html" data-th="รายงาน / Feedback" data-en="Feedback">รายงาน / Feedback</a>
+      <a href="terms.html" data-th="ข้อตกลงการใช้งาน" data-en="Terms">ข้อตกลงการใช้งาน</a>
+      <button class="lang-toggle" id="langToggle">EN</button>
+    </nav>
+  </div>
+</header>
+
+<main class="page" style="max-width: 720px;">
+  <h1>🔋 <span data-th="คำนวณระยะทางรถ EV" data-en="EV Range Calculator">คำนวณระยะทางรถ EV</span></h1>
+  <p class="lead" data-th="แบตเหลือเท่านี้ วิ่งได้อีกกี่กิโล? ไปถึงปลายทางจะเหลือกี่ % และชาร์จเต็มต้องจ่ายเท่าไร — คำนวณในเครื่องคุณ ไม่ส่งข้อมูลไปไหน"
+     data-en="How far can you go on what's left? What % will you arrive with, and what does a top-up cost? Calculated on your device, nothing is sent.">แบตเหลือเท่านี้ วิ่งได้อีกกี่กิโล?</p>
+
+  <div class="box">
+    <h3 data-th="🚗 รถของคุณ" data-en="🚗 Your car">🚗 รถของคุณ</h3>
+    <label for="car" data-th="รุ่นรถ (ค่าเริ่มต้นโดยประมาณ แก้ไขได้)" data-en="Model (approximate presets, editable)">รุ่นรถ</label>
+    <select id="car"></select>
+    <div class="row2">
+      <div><label for="bat" data-th="ความจุแบตที่ใช้ได้ (kWh)" data-en="Usable battery (kWh)">ความจุแบตที่ใช้ได้ (kWh)</label><input id="bat" type="number" step="0.1" min="1" inputmode="decimal"></div>
+      <div><label for="eff" data-th="อัตราสิ้นเปลือง (kWh/100 กม.)" data-en="Consumption (kWh/100 km)">อัตราสิ้นเปลือง (kWh/100 กม.)</label><input id="eff" type="number" step="0.1" min="5" inputmode="decimal"></div>
+    </div>
+  </div>
+
+  <div class="box">
+    <h3 data-th="⚡ แบตและสภาพการขับ" data-en="⚡ Battery &amp; conditions">⚡ แบตและสภาพการขับ</h3>
+    <div class="row2">
+      <div><label for="soc" data-th="แบตตอนนี้ (%)" data-en="Battery now (%)">แบตตอนนี้ (%)</label><input id="soc" type="number" min="0" max="100" value="80" inputmode="numeric"></div>
+      <div><label for="res" data-th="เผื่อสำรองไว้ (%)" data-en="Keep in reserve (%)">เผื่อสำรองไว้ (%)</label><input id="res" type="number" min="0" max="50" value="10" inputmode="numeric"></div>
+    </div>
+    <label for="style" data-th="ลักษณะการขับ" data-en="Driving">ลักษณะการขับ</label>
+    <select id="style">
+      <option value="0.9" data-th="ในเมือง รถติด (ประหยัดสุด)" data-en="City / traffic (most efficient)">ในเมือง รถติด</option>
+      <option value="1" selected data-th="ผสม เมือง + ทางด่วน" data-en="Mixed city + expressway">ผสม เมือง + ทางด่วน</option>
+      <option value="1.15" data-th="ทางหลวง ~100 กม./ชม." data-en="Highway ~100 km/h">ทางหลวง ~100 กม./ชม.</option>
+      <option value="1.32" data-th="ทางหลวงเร็ว ~120 กม./ชม." data-en="Fast highway ~120 km/h">ทางหลวงเร็ว ~120 กม./ชม.</option>
+    </select>
+    <div class="row2">
+      <div><label for="ac" data-th="แอร์" data-en="Air-con">แอร์</label>
+        <select id="ac"><option value="1" data-th="ปิด" data-en="Off">ปิด</option><option value="1.05" selected data-th="เปิดปกติ" data-en="Normal">เปิดปกติ</option><option value="1.1" data-th="เปิดแรง / อากาศร้อนจัด" data-en="High / very hot day">เปิดแรง</option></select></div>
+      <div><label for="load" data-th="ผู้โดยสาร + สัมภาระ" data-en="Passengers + load">ผู้โดยสาร + สัมภาระ</label>
+        <select id="load"><option value="1" data-th="1–2 คน" data-en="1–2 people">1–2 คน</option><option value="1.03" data-th="3–4 คน" data-en="3–4 people">3–4 คน</option><option value="1.07" data-th="เต็มคัน + ของเยอะ" data-en="Full car + luggage">เต็มคัน + ของเยอะ</option></select></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat big" style="--c: var(--volt)"><small data-th="วิ่งได้อีกประมาณ" data-en="Estimated range">วิ่งได้อีกประมาณ</small><b id="oRange">–</b><span data-th="กม. (ก่อนถึงระดับสำรอง)" data-en="km (before reserve)">กม.</span></div>
+    <div class="stat"><small data-th="ระยะเต็มแบต (100%)" data-en="Full battery (100%)">ระยะเต็มแบต (100%)</small><b id="oFull">–</b><span>km</span></div>
+    <div class="stat"><small data-th="สิ้นเปลืองจริงโดยประมาณ" data-en="Adjusted consumption">สิ้นเปลืองจริงโดยประมาณ</small><b id="oEff">–</b><span>kWh/100 km</span></div>
+    <div class="stat"><small data-th="ระยะต่อแบต 1%" data-en="Range per 1%">ระยะต่อแบต 1%</small><b id="oPer">–</b><span>km</span></div>
+  </div>
+
+  <div class="box">
+    <h3 data-th="🗺️ วางแผนทริป" data-en="🗺️ Trip planner">🗺️ วางแผนทริป</h3>
+    <label for="dist" data-th="ระยะทางที่จะไป (กม.)" data-en="Trip distance (km)">ระยะทางที่จะไป (กม.)</label>
+    <input id="dist" type="number" min="0" value="150" inputmode="decimal">
+    <div class="bar"><i id="barFill"></i></div>
+    <p id="tripMsg" class="result-msg"></p>
+  </div>
+
+  <div class="box">
+    <h3 data-th="💸 ค่าชาร์จ" data-en="💸 Charging cost">💸 ค่าชาร์จ</h3>
+    <div class="row2">
+      <div><label for="to" data-th="ชาร์จถึง (%)" data-en="Charge to (%)">ชาร์จถึง (%)</label><input id="to" type="number" min="1" max="100" value="100" inputmode="numeric"></div>
+      <div><label for="price" data-th="ราคาไฟ (บาท/kWh)" data-en="Price (THB/kWh)">ราคาไฟ (บาท/kWh)</label>
+        <input id="price" type="number" step="0.01" min="0" value="3.00" inputmode="decimal"></div>
+    </div>
+    <div class="chips">
+      <button type="button" data-p="3.00" data-th="บ้าน TOU Off-Peak ~3.0" data-en="Home TOU off-peak ~3.0">บ้าน TOU Off-Peak ~3.0</button>
+      <button type="button" data-p="4.30" data-th="บ้าน อัตราปกติ ~4.3" data-en="Home normal ~4.3">บ้าน อัตราปกติ ~4.3</button>
+      <button type="button" data-p="7.50" data-th="ตู้ DC สาธารณะ ~7.5" data-en="Public DC ~7.5">ตู้ DC สาธารณะ ~7.5</button>
+    </div>
+    <label for="loss" data-th="การสูญเสียระหว่างชาร์จ" data-en="Charging losses">การสูญเสียระหว่างชาร์จ</label>
+    <select id="loss"><option value="1.12" data-th="ชาร์จ AC ที่บ้าน (~12%)" data-en="AC home charging (~12%)">ชาร์จ AC ที่บ้าน (~12%)</option><option value="1.05" data-th="ชาร์จเร็ว DC (~5%)" data-en="DC fast charging (~5%)">ชาร์จเร็ว DC (~5%)</option></select>
+    <p id="costMsg" class="result-msg"></p>
+  </div>
+
+  <p class="note" data-th="ผลลัพธ์เป็นค่าประมาณ ระยะทางจริงขึ้นกับความเร็ว อุณหภูมิ สภาพถนน ยาง และอายุแบต ค่าเริ่มต้นของแต่ละรุ่นเป็นตัวเลขโดยประมาณจากการใช้งานจริง แนะนำให้ใส่ค่าสิ้นเปลืองจากหน้าจอรถของคุณเองเพื่อความแม่นยำ"
+     data-en="Estimates only. Real range depends on speed, temperature, road, tyres and battery age. Model presets are rough real-world figures; enter the consumption from your own car's display for best accuracy.">ผลลัพธ์เป็นค่าประมาณ</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Overdrive Labs</span>
+    <span><a href="index.html" data-th="หน้าแรก" data-en="Home">หน้าแรก</a> · <a href="connect.html" data-th="เชื่อมต่อ" data-en="Connect">เชื่อมต่อ</a> · <a href="terms.html" data-th="ข้อตกลงการใช้งาน" data-en="Terms">ข้อตกลงการใช้งาน</a></span>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+<script>
+
+var CARS=[["BYD Atto 3 (60.5 kWh)",60.5,16],["BYD Dolphin (44.9 kWh)",44.9,14],["BYD Seal (82.5 kWh)",82.5,16.5],["BYD Sealion 7 (82.5 kWh)",82.5,18.5],["Tesla Model 3 RWD (57.5 kWh)",57.5,14],["Tesla Model Y RWD (57.5 kWh)",57.5,15.5],["MG4 (51 kWh)",51,16],["MG ZS EV (49 kWh)",49,17],["ORA Good Cat (47.8 kWh)",47.8,15.5],["NETA V (38.5 kWh)",38.5,14],["Deepal S07 (80 kWh)",80,18],["Volvo EX30 (64 kWh)",64,16.5],["Custom / อื่น ๆ",50,15]];
+function $(i){return document.getElementById(i)}
+function n(i){var v=parseFloat($(i).value);return isNaN(v)?0:v}
+var sel=$("car");CARS.forEach(function(c,i){var o=document.createElement("option");o.value=i;o.textContent=c[0];sel.appendChild(o)});
+function load(){var c=CARS[sel.value];$("bat").value=c[1];$("eff").value=c[2];calc()}
+function fmt(x,d){return x.toLocaleString(OV.lang()==="th"?"th-TH":"en-US",{maximumFractionDigits:d||0,minimumFractionDigits:d||0})}
+function calc(){
+  var th=OV.lang()==="th",bat=n("bat"),base=n("eff"),soc=Math.min(100,Math.max(0,n("soc"))),res=Math.min(soc,Math.max(0,n("res")));
+  var eff=base*parseFloat($("style").value)*parseFloat($("ac").value)*parseFloat($("load").value);
+  if(!bat||!eff){return}
+  var full=bat/eff*100,per=full/100,range=(soc-res)*per;
+  $("oRange").textContent=fmt(Math.max(0,range));$("oFull").textContent=fmt(full);$("oEff").textContent=fmt(eff,1);$("oPer").textContent=fmt(per,1);
+  var d=n("dist"),need=d/per,arrive=soc-need,m=$("tripMsg"),b=$("barFill");
+  b.style.width=Math.max(0,Math.min(100,arrive))+"%";
+  if(arrive>=res){b.style.background="var(--volt)";m.innerHTML=(th?"✅ ไปถึงได้ เหลือแบตประมาณ <b>":"✅ You'll make it, arriving with about <b>")+fmt(arrive)+"%</b>"+(th?" (ใช้ไป "+fmt(need)+"%)":" (uses "+fmt(need)+"%)")}
+  else if(arrive>0){b.style.background="var(--accent)";m.innerHTML=(th?"⚠️ ไปถึงได้แต่ต่ำกว่าระดับสำรอง เหลือ <b>":"⚠️ Possible but below your reserve: <b>")+fmt(arrive)+"%</b>"+(th?" แนะนำแวะชาร์จระหว่างทาง":". Consider a charging stop.")}
+  else{b.style.background="#e63946";var stop=Math.ceil((need-(soc-res))*per);m.innerHTML=(th?"❌ ไม่พอ ต้องชาร์จเพิ่มระหว่างทางอีกประมาณ <b>":"❌ Not enough. You need about <b>")+fmt(stop)+(th?" กม.</b> หรือแวะชาร์จหลังวิ่งไปไม่เกิน <b>":" km</b> more; stop to charge within <b>")+fmt(Math.max(0,range))+(th?" กม.</b>":" km</b>.")}
+  var to=Math.min(100,Math.max(0,n("to"))),add=Math.max(0,to-soc)/100*bat,grid=add*parseFloat($("loss").value),cost=grid*n("price"),c=$("costMsg");
+  if(add<=0){c.textContent=th?"แบตตอนนี้สูงกว่าเป้าหมายแล้ว":"Battery is already above the target."}
+  else c.innerHTML=(th?"ชาร์จ "+fmt(soc)+"% → "+fmt(to)+"% เข้าแบต <b>":"Charging "+fmt(soc)+"% → "+fmt(to)+"% adds <b>")+fmt(add,1)+" kWh</b>"+(th?" (ดึงจากปลั๊ก ~":" (~")+fmt(grid,1)+(th?" kWh) ค่าไฟประมาณ <b>":" kWh from the wall), costing about <b>")+fmt(cost)+(th?" บาท</b> · ได้ระยะเพิ่ม ~":" THB</b> · adds ~")+fmt(add/eff*100)+(th?" กม. · เฉลี่ย ":" km · ")+fmt(cost/(add/eff*100),2)+(th?" บาท/กม.":" THB/km");
+}
+sel.addEventListener("change",load);
+document.querySelectorAll("input,select").forEach(function(e){if(e!==sel)e.addEventListener("input",calc)});
+document.querySelectorAll(".chips button").forEach(function(b){b.addEventListener("click",function(){$("price").value=b.dataset.p;calc()})});
+$("langToggle").addEventListener("click",function(){setTimeout(calc,0)});
+load();
+
+</script>
+</body>
+</html>
