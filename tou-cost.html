@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title data-th="คำนวณค่าไฟ TOU – Overdrive Utility" data-en="TOU Electricity Cost Calculator – Overdrive Utility">คำนวณค่าไฟ TOU – Overdrive Utility</title>
 <meta name="description" content="คำนวณค่าไฟอัตรา TOU เทียบกับอัตราปกติ (บ้านอยู่อาศัย PEA/MEA) รวมค่า Ft และ VAT พร้อมคิดค่าชาร์จรถ EV">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=7">
 <link rel="icon" type="image/png" href="assets/logo.png">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 </head>
@@ -34,11 +34,34 @@
 
   <div class="box">
     <h3 data-th="🏠 ไฟบ้าน (ต่อเดือน)" data-en="🏠 Household use (per month)">🏠 ไฟบ้าน (ต่อเดือน)</h3>
-    <div class="row2">
-      <div><label for="home" data-th="หน่วยไฟบ้าน (kWh/เดือน) ไม่รวมรถ" data-en="Home kWh / month (excluding EV)">หน่วยไฟบ้าน (kWh/เดือน)</label><input id="home" type="number" min="0" value="350" inputmode="decimal"></div>
-      <div><label for="homeOff" data-th="ใช้ช่วง Off-Peak (%)" data-en="Used in Off-Peak (%)">ใช้ช่วง Off-Peak (%)</label><input id="homeOff" type="number" min="0" max="100" value="55" inputmode="numeric"></div>
+    <label for="home" data-th="หน่วยไฟบ้าน (kWh/เดือน) ไม่รวมรถ" data-en="Home kWh / month (excluding EV)">หน่วยไฟบ้าน (kWh/เดือน)</label>
+    <input id="home" type="number" min="0" value="350" inputmode="decimal">
+    <input id="homeOff" type="hidden" value="55"><input id="evOff" type="hidden" value="100">
+  </div>
+
+  <div class="box">
+    <h3 data-th="📊 กราฟการใช้ไฟใน 1 วัน (วันทำงาน จ–ศ)" data-en="📊 Daily usage profile (weekdays Mon–Fri)">📊 กราฟการใช้ไฟใน 1 วัน</h3>
+    <p class="note" style="margin-top:0" data-th="แตะหรือลากบนกราฟเพื่อปรับว่าแต่ละชั่วโมงบ้านใช้ไฟมากน้อยแค่ไหน แถบสีส้มคือช่วง On-Peak (09:00–22:00) สีเขียวคือ Off-Peak ส่วนสีฟ้าคือช่วงที่ชาร์จรถ · ส–อา และวันหยุดราชการเป็น Off-Peak ทั้งวัน"
+       data-en="Tap or drag on the chart to set how much your home uses each hour. Orange = On-Peak (09:00–22:00), green = Off-Peak, blue = EV charging. Weekends and public holidays are Off-Peak all day.">แตะหรือลากบนกราฟ</p>
+    <div class="chips" id="presets">
+      <button type="button" data-p="work" data-th="🏢 ไปทำงานกลางวัน" data-en="🏢 Out at work">🏢 ไปทำงานกลางวัน</button>
+      <button type="button" data-p="home" data-th="🏠 อยู่บ้านทั้งวัน" data-en="🏠 Home all day">🏠 อยู่บ้านทั้งวัน</button>
+      <button type="button" data-p="night" data-th="🌙 ใช้ไฟกลางคืนเป็นหลัก" data-en="🌙 Mostly at night">🌙 ใช้ไฟกลางคืนเป็นหลัก</button>
+      <button type="button" data-p="flat" data-th="➖ เท่ากันทุกชั่วโมง" data-en="➖ Flat">➖ เท่ากันทุกชั่วโมง</button>
     </div>
-    <p class="note" data-th="Off-Peak = จ–ศ 22:00–09:00 และ ส–อา–วันหยุดราชการทั้งวัน ซึ่งคิดเป็นราว 65% ของชั่วโมงทั้งหมด บ้านที่มีคนอยู่กลางวันมักอยู่ที่ 45–60%" data-en="Off-Peak = Mon–Fri 22:00–09:00 plus weekends and public holidays all day, about 65% of all hours. Homes occupied in the daytime are usually 45–60%.">Off-Peak</p>
+    <div class="chart-wrap">
+      <div class="chart" id="chart" role="img" aria-label="Hourly usage chart"></div>
+      <div class="chart-x" id="chartX"></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#ff8a3d"></i><span data-th="On-Peak 09–22" data-en="On-Peak 09–22">On-Peak 09–22</span></span>
+      <span><i style="background:#16a36a"></i><span data-th="Off-Peak" data-en="Off-Peak">Off-Peak</span></span>
+      <span><i style="background:#2f7cf6"></i><span data-th="ชาร์จรถ EV" data-en="EV charging">ชาร์จรถ EV</span></span>
+    </div>
+    <div class="split">
+      <div class="split-bar"><i id="splitOff"></i><b id="splitPeak"></b></div>
+      <div class="split-lbl"><span id="lblOff"></span><span id="lblPeak"></span></div>
+    </div>
   </div>
 
   <div class="box">
@@ -49,10 +72,31 @@
     </div>
     <div class="row2">
       <div><label for="evHome" data-th="ชาร์จที่บ้าน (%)" data-en="Charged at home (%)">ชาร์จที่บ้าน (%)</label><input id="evHome" type="number" min="0" max="100" value="90" inputmode="numeric"></div>
-      <div><label for="evOff" data-th="ชาร์จช่วง Off-Peak (%)" data-en="Charged in Off-Peak (%)">ชาร์จช่วง Off-Peak (%)</label><input id="evOff" type="number" min="0" max="100" value="100" inputmode="numeric"></div>
+      <div><label for="kw" data-th="กำลังเครื่องชาร์จ" data-en="Charger power">กำลังเครื่องชาร์จ</label>
+        <select id="kw"><option value="2.2" data-th="สายชาร์จฉุกเฉิน 2.2 kW" data-en="Portable 2.2 kW">สายชาร์จฉุกเฉิน 2.2 kW</option><option value="3.6">Wallbox 3.6 kW</option><option value="7" selected>Wallbox 7 kW</option><option value="11">Wallbox 11 kW (3 เฟส)</option></select></div>
+    </div>
+    <label for="start" data-th="เริ่มชาร์จกี่โมง (ลากเพื่อเลือก)" data-en="Charging start time (drag)">เริ่มชาร์จกี่โมง</label>
+    <div class="range-head"><span class="pill end" id="startLbl">22:00</span><span class="arrow">→</span><span class="pill" id="endLbl">–</span></div>
+    <input id="start" type="range" min="0" max="23" step="1" value="22" class="single">
+    <div class="chips" id="startChips">
+      <button type="button" data-s="22" data-th="22:00 (เริ่ม Off-Peak)" data-en="22:00 (Off-Peak starts)">22:00</button>
+      <button type="button" data-s="0">00:00</button>
+      <button type="button" data-s="18" data-th="18:00 (กลับถึงบ้าน)" data-en="18:00 (arrive home)">18:00</button>
     </div>
     <p class="note" id="evNote"></p>
   </div>
+
+  <div class="price-card">
+    <small data-th="ค่าไฟต่อเดือนแบบ TOU (รวม Ft + VAT)" data-en="Monthly TOU bill (incl. Ft + VAT)">ค่าไฟต่อเดือนแบบ TOU</small>
+    <div class="price-big"><b id="oTou">–</b> <span data-th="บาท/เดือน" data-en="THB / month">บาท/เดือน</span></div>
+    <div class="price-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div><b id="oNorm">–</b><span data-th="อัตราปกติ (บาท/เดือน)" data-en="Normal tariff (THB/mo)">อัตราปกติ (บาท/เดือน)</span></div>
+      <div id="saveBox"><b id="oSave">–</b><span id="saveLbl"></span></div>
+      <div><b id="oYear">–</b><span data-th="ประหยัดต่อปี (บาท)" data-en="Saved per year (THB)">ประหยัดต่อปี (บาท)</span></div>
+    </div>
+    <div class="compare" id="perUnit"></div>
+  </div>
+  <span id="saveYear" hidden></span>
 
   <details class="box">
     <summary data-th="⚙️ อัตราค่าไฟ (แก้ไขได้)" data-en="⚙️ Tariff settings (editable)">⚙️ อัตราค่าไฟ (แก้ไขได้)</summary>
@@ -73,12 +117,6 @@
     <p class="note" data-th="อัตราปกติที่ใช้เทียบ: บ้านอยู่อาศัยเกิน 150 หน่วย (1.1.2) — 1–150 หน่วย 3.2484, 151–400 หน่วย 4.2218, 401 หน่วยขึ้นไป 4.4217 บาท + ค่าบริการ 24.62 บาท/เดือน · ค่า Ft ปรับทุก 4 เดือน โปรดตรวจค่าล่าสุดจากบิลของคุณ" data-en="Normal tariff for comparison: residential over 150 units (1.1.2), 3.2484 for units 1–150, 4.2218 for 151–400 and 4.4217 THB above 400, plus a 24.62 THB monthly fee. Ft changes every 4 months; check your latest bill.">อัตราปกติ</p>
   </details>
 
-  <div class="stats">
-    <div class="stat" style="--c: var(--volt)"><small data-th="ค่าไฟแบบ TOU" data-en="TOU bill">ค่าไฟแบบ TOU</small><b id="oTou">–</b><span data-th="บาท/เดือน" data-en="THB / month">บาท/เดือน</span></div>
-    <div class="stat" style="--c: var(--blue)"><small data-th="ค่าไฟอัตราปกติ" data-en="Normal-tariff bill">ค่าไฟอัตราปกติ</small><b id="oNorm">–</b><span data-th="บาท/เดือน" data-en="THB / month">บาท/เดือน</span></div>
-    <div class="stat big" id="saveBox"><small id="saveLbl"></small><b id="oSave">–</b><span id="saveYear"></span></div>
-  </div>
-
   <div class="box">
     <h3 data-th="📋 รายละเอียด" data-en="📋 Breakdown">📋 รายละเอียด</h3>
     <div class="table-wrap"><table id="tbl"></table></div>
@@ -97,7 +135,7 @@
   </div>
 </footer>
 
-<script src="assets/site.js"></script>
+<script src="assets/site.js?v=7"></script>
 <script>
 
 var T={low:{peak:5.7982,off:2.6369,svc:24.62},mid:{peak:5.1135,off:2.6037,svc:312.24}};
@@ -116,8 +154,9 @@ function calc(){
   var left=total,nEnergy=0;STEPS.forEach(function(s){var u=Math.min(left,s[0]);nEnergy+=u*s[1];left-=u});
   var norm=(nEnergy+SVC_N+total*ft)*vat,save=norm-tou;
   $("oTou").textContent=fmt(tou);$("oNorm").textContent=fmt(norm);$("oSave").textContent=fmt(Math.abs(save));
-  var sb=$("saveBox");sb.style.setProperty("--c",save>=0?"var(--volt)":"#e63946");
-  $("saveLbl").textContent=save>=0?(th?"✅ TOU ประหยัดกว่า":"✅ TOU saves you"):(th?"⚠️ อัตราปกติถูกกว่า":"⚠️ Normal tariff is cheaper");
+  $("saveBox").style.color=save>=0?"var(--volt)":"#e63946";$("oYear").textContent=(save<0?"-":"")+fmt(Math.abs(save)*12);
+  $("perUnit").innerHTML="<div><span>"+(th?"🟠 On-Peak":"🟠 On-Peak")+" ("+fmt(peakK)+" kWh × "+fmt(n("peak"),2)+")</span><b>"+fmt(peakK*n("peak")*vat)+(th?" บาท":" THB")+"</b></div><div><span>🟢 Off-Peak ("+fmt(offK)+" kWh × "+fmt(n("off"),2)+")</span><b>"+fmt(offK*n("off")*vat)+(th?" บาท":" THB")+"</b></div><div><span>"+(th?"ค่าบริการ + Ft":"Service fee + Ft")+"</span><b>"+fmt((touSvc+touFt)*vat)+(th?" บาท":" THB")+"</b></div>";
+  $("saveLbl").textContent=save>=0?(th?"✅ ประหยัด/เดือน (บาท)":"✅ Saved / month (THB)"):(th?"⚠️ แพงกว่าอัตราปกติ (บาท)":"⚠️ Costs more (THB)");
   $("saveYear").textContent=(th?"บาท/เดือน · ปีละ ~":"THB / month · ~")+fmt(Math.abs(save)*12)+(th?" บาท":" THB / year");
   $("evNote").textContent=(th?"รถใช้ไฟประมาณ ":"The EV uses about ")+fmt(n("km")*n("evEff")/100)+(th?" kWh/เดือน ชาร์จที่บ้าน ":" kWh/month, of which ")+fmt(evKwh)+(th?" kWh":" kWh is charged at home");
   var r=function(a,b,c){return "<tr><td>"+a+"</td><td style='text-align:right'>"+b+"</td><td style='text-align:right'>"+c+"</td></tr>"};
@@ -131,8 +170,49 @@ function calc(){
   $("evCost").innerHTML=evKwh>0?(th?"🔌 ค่าชาร์จรถเฉลี่ยแบบ TOU ≈ <b>":"🔌 Average TOU charging rate ≈ <b>")+fmt(rateEv,2)+(th?" บาท/kWh</b> · ≈ <b>":" THB/kWh</b> · ≈ <b>")+fmt(rateEv*n("evEff")/100,2)+(th?" บาท/กม.</b> · ค่าชาร์จที่บ้าน ~":" THB/km</b> · home charging ~")+fmt(rateEv*evKwh)+(th?" บาท/เดือน":" THB/month"):"";
 }
 $("tariff").addEventListener("change",setTariff);
-document.querySelectorAll("input,select").forEach(function(e){if(e.id!=="tariff"){e.addEventListener("input",calc);e.addEventListener("change",calc)}});
+document.querySelectorAll("input,select").forEach(function(e){if(e.id!=="tariff"){e.addEventListener("input",function(){calc()});e.addEventListener("change",function(){calc()})}});
 $("langToggle").addEventListener("click",function(){setTimeout(calc,0)});
+var WD=21.7,OFFD=30.4-21.7,DAYS=30.4;
+function isPeak(hr){return hr>=9&&hr<22}
+var PRE={work:[3,2,2,2,2,2,4,6,5,2,1,1,1,1,1,1,2,4,7,9,10,9,7,5],home:[3,2,2,2,2,2,3,5,5,5,6,7,8,8,8,7,7,8,9,10,10,9,6,4],night:[6,5,5,5,4,4,4,4,3,1,1,1,1,1,1,1,1,2,4,6,7,8,9,8],flat:Array(24).fill(5)};
+var prof=PRE.work.slice(),MAX=10,chart=$("chart");
+for(var i=0;i<24;i++){var c=document.createElement("div");c.className="col";c.innerHTML="<b class='ev'></b><i></i>";chart.appendChild(c)}
+$("chartX").innerHTML=[0,3,6,9,12,15,18,21].map(function(x){return "<span style='left:"+(x/24*100)+"%'>"+(x<10?"0":"")+x+"</span>"}).join("")+"<span style='left:100%'>24</span>";
+function evHours(){var daily=n("km")*n("evEff")/100*pc("evHome")/DAYS,kw=parseFloat($("kw").value);return {daily:daily,h:Math.min(24,daily/kw),kw:kw}}
+function drawChart(){
+  var e=evHours(),s=parseInt($("start").value,10),cols=chart.children,evArr=[];
+  for(var i=0;i<24;i++)evArr[i]=0;
+  var left=e.h;for(var k=0;left>0&&k<24;k++){var hr=(s+k)%24,f=Math.min(1,left);evArr[hr]=f;left-=f}
+  var homeDaily=n("home")/DAYS,sum=prof.reduce(function(a,b){return a+b},0)||1,maxKwh=0,hk=[];
+  for(i=0;i<24;i++){hk[i]=prof[i]/sum*homeDaily;maxKwh=Math.max(maxKwh,hk[i]+evArr[i]*e.kw)}
+  maxKwh=Math.max(maxKwh,0.1);
+  for(i=0;i<24;i++){var col=cols[i];col.classList.toggle("peak",isPeak(i));
+    col.querySelector("i").style.height=(hk[i]/maxKwh*100)+"%";
+    col.querySelector(".ev").style.height=(evArr[i]*e.kw/maxKwh*100)+"%";
+    col.title=(i<10?"0":"")+i+":00  "+fmt(hk[i],2)+" kWh"+(evArr[i]?" + EV "+fmt(evArr[i]*e.kw,1)+" kWh":"")}
+  var hp=0,ep=0;for(i=0;i<24;i++){if(isPeak(i)){hp+=prof[i];ep+=evArr[i]}}
+  var homeOffWk=1-hp/sum,evOffWk=e.h>0?1-ep/e.h:1;
+  // weekdays use profile; weekends/holidays all off-peak. EV charges on weekdays (5/7 driving days) — spread across month
+  $("homeOff").value=((WD*homeOffWk+OFFD)/DAYS*100).toFixed(1);
+  $("evOff").value=((WD*evOffWk+OFFD)/DAYS*100).toFixed(1);
+  var endH=(s+Math.ceil(e.h))%24;$("startLbl").textContent=(s<10?"0":"")+s+":00";$("endLbl").textContent=e.h>0?(endH<10?"0":"")+endH+":00 ("+fmt(e.h,1)+(OV.lang()==="th"?" ชม.)":" h)"):"–";
+  $("endLbl").className="pill"+(ep>0?"":" end");$("startLbl").className="pill"+(isPeak(s)?"":" end");
+}
+function setFromPointer(ev){var r=chart.getBoundingClientRect(),i=Math.floor((ev.clientX-r.left)/r.width*24);if(i<0||i>23)return;
+  var v=Math.max(0,Math.min(MAX,(r.bottom-ev.clientY)/r.height*MAX));prof[i]=Math.round(v*2)/2;calc()}
+var drag=false;
+chart.addEventListener("pointerdown",function(e){drag=true;chart.setPointerCapture(e.pointerId);setFromPointer(e);e.preventDefault()});
+chart.addEventListener("pointermove",function(e){if(drag)setFromPointer(e)});
+chart.addEventListener("pointerup",function(){drag=false});chart.addEventListener("pointercancel",function(){drag=false});
+document.querySelectorAll("#presets button").forEach(function(b){b.addEventListener("click",function(){prof=PRE[b.dataset.p].slice();calc()})});
+document.querySelectorAll("#startChips button").forEach(function(b){b.addEventListener("click",function(){$("start").value=b.dataset.s;calc()})});
+var _calc=calc;calc=function(){drawChart();_calc();
+  var th=OV.lang()==="th",ho=parseFloat($("homeOff").value),eo=parseFloat($("evOff").value);
+  var home=n("home"),evK=n("km")*n("evEff")/100*pc("evHome"),off=home*ho/100+evK*eo/100,tot=home+evK||1,offP=off/tot*100;
+  $("splitOff").style.width=offP+"%";
+  $("lblOff").innerHTML="🟢 Off-Peak <b>"+fmt(offP)+"%</b> · "+fmt(off)+" kWh";
+  $("lblPeak").innerHTML="🟠 On-Peak <b>"+fmt(100-offP)+"%</b> · "+fmt(tot-off)+" kWh";
+};
 setTariff();
 
 </script>
